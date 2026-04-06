@@ -1,6 +1,6 @@
 package com.project.board.controller;
 
-import com.project.board.entity.Board;
+import com.project.board.dto.BoardDto;
 import com.project.board.service.BoardService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,19 +18,19 @@ public class BoardController {
 
     // 글 작성
     @PostMapping
-    public Board create(@RequestBody Board board) {
-        return boardService.save(board);
+    public BoardDto create(@RequestBody BoardDto dto) {
+        return boardService.save(dto);
     }
 
     // 전체 조회
     @GetMapping
-    public List<Board> list() {
+    public List<BoardDto> list() {
         return boardService.findAll();
     }
 
     // 상세 조회
     @GetMapping("/{id}")
-    public Board detail(@PathVariable Long id) {
+    public BoardDto detail(@PathVariable Long id) {
         return boardService.findById(id);
     }
 
