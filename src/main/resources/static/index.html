@@ -9,7 +9,9 @@
 <h1>게시판</h1>
 
 <input id="title" placeholder="제목">
+<input id="author" placeholder="작성자">
 <input id="content" placeholder="내용">
+
 <button onclick="create()">글 작성</button>
 
 <hr>
@@ -17,10 +19,8 @@
 <ul id="list"></ul>
 
 <script>
-const API = "/board";
-
 function load() {
-    fetch(API)
+    fetch("/board")
         .then(res => res.json())
         .then(data => {
             const list = document.getElementById("list");
@@ -28,28 +28,40 @@ function load() {
 
             data.forEach(item => {
                 const li = document.createElement("li");
+
                 li.innerHTML = `
-                    ${item.id} - ${item.title} - ${item.content}
+                    <b>${item.title}</b><br>
+                    작성자: ${item.author}<br>
+                    시간: ${item.createdAt}<br>
+                    내용: ${item.content}<br>
                     <button onclick="remove(${item.id})">삭제</button>
+                    <hr>
                 `;
+
                 list.appendChild(li);
             });
         });
 }
 
 function create() {
-    fetch(API, {
+    fetch("/board", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
             title: document.getElementById("title").value,
-            content: document.getElementById("content").value
+            content: document.getElementById("content").value,
+            author: document.getElementById("author").value
         })
-    }).then(() => load());
+    }).then(res => {
+        if (!res.ok) {
+            alert("입력값 확인하세요");
+        }
+        load();
+    });
 }
 
 function remove(id) {
-    fetch(API + "/" + id, {
+    fetch("/board/" + id, {
         method: "DELETE"
     }).then(() => load());
 }
