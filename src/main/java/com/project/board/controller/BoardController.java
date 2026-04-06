@@ -60,4 +60,9 @@ public class BoardController {
     public void delete(@PathVariable Long id) {
         boardService.delete(id);
     }
+    
+    @GetMapping("/")
+    public String home() {
+        return "server is running";
+    }
 }
