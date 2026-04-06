@@ -8,11 +8,21 @@
 
 <h1>게시판</h1>
 
+<input id="id" placeholder="ID">
 <input id="title" placeholder="제목">
 <input id="author" placeholder="작성자">
 <input id="content" placeholder="내용">
 
-<button onclick="create()">글 작성</button>
+<button onclick="create()">작성</button>
+<button onclick="update()">수정</button>
+
+<hr>
+
+<input id="keyword" placeholder="제목 검색">
+<button onclick="search()">검색</button>
+
+<input id="authorSearch" placeholder="작성자 검색">
+<button onclick="searchAuthor()">작성자 검색</button>
 
 <hr>
 
@@ -22,25 +32,7 @@
 function load() {
     fetch("/board")
         .then(res => res.json())
-        .then(data => {
-            const list = document.getElementById("list");
-            list.innerHTML = "";
-
-            data.forEach(item => {
-                const li = document.createElement("li");
-
-                li.innerHTML = `
-                    <b>${item.title}</b><br>
-                    작성자: ${item.author}<br>
-                    시간: ${item.createdAt}<br>
-                    내용: ${item.content}<br>
-                    <button onclick="remove(${item.id})">삭제</button>
-                    <hr>
-                `;
-
-                list.appendChild(li);
-            });
-        });
+        .then(showList);
 }
 
 function create() {
@@ -48,22 +40,54 @@ function create() {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-            title: document.getElementById("title").value,
-            content: document.getElementById("content").value,
-            author: document.getElementById("author").value
+            title: title.value,
+            content: content.value,
+            author: author.value
         })
-    }).then(res => {
-        if (!res.ok) {
-            alert("입력값 확인하세요");
-        }
-        load();
-    });
+    }).then(load);
 }
 
-function remove(id) {
-    fetch("/board/" + id, {
-        method: "DELETE"
-    }).then(() => load());
+function update() {
+    fetch("/board/" + id.value, {
+        method: "PUT",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            title: title.value,
+            content: content.value
+        })
+    }).then(load);
+}
+
+function remove(i) {
+    fetch("/board/" + i, { method: "DELETE" }).then(load);
+}
+
+function search() {
+    fetch("/board/search?keyword=" + keyword.value)
+        .then(res => res.json())
+        .then(showList);
+}
+
+function searchAuthor() {
+    fetch("/board/author?author=" + authorSearch.value)
+        .then(res => res.json())
+        .then(showList);
+}
+
+function showList(data) {
+    list.innerHTML = "";
+    data.forEach(item => {
+        list.innerHTML += `
+            <li>
+                <b>${item.title}</b><br>
+                작성자: ${item.author}<br>
+                내용: ${item.content}<br>
+                ID: ${item.id}<br>
+                <button onclick="remove(${item.id})">삭제</button>
+                <hr>
+            </li>
+        `;
+    });
 }
 
 load();
