@@ -1,96 +1,193 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>게시판</title>
+<meta charset="UTF-8">
+<title>게시판</title>
 </head>
 <body>
 
 <h1>게시판</h1>
 
-<input id="id" placeholder="ID">
-<input id="title" placeholder="제목">
-<input id="author" placeholder="작성자">
-<input id="content" placeholder="내용">
+<!-- =========================
+메인 화면
+========================= -->
+<div id="mainView">
+    <button onclick="showWrite()">글쓰기</button>
+    <hr>
+    <div id="list"></div>
+</div>
 
-<button onclick="create()">작성</button>
-<button onclick="update()">수정</button>
+<!-- =========================
+상세 화면
+========================= -->
+<div id="detailView" style="display:none;">
+    <h2 id="d_title"></h2>
+    <p>글번호: <span id="d_id"></span></p>
+    <p>작성자: <span id="d_author"></span></p>
+    <p>작성일: <span id="d_date"></span></p>
+    <p id="d_content"></p>
 
-<hr>
+    <button onclick="deletePost()">삭제</button>
+    <button onclick="editMode()">수정</button>
+    <button onclick="goMain()">메인</button>
+    <button onclick="showWrite()">글쓰기</button>
+</div>
 
-<input id="keyword" placeholder="제목 검색">
-<button onclick="search()">검색</button>
+<!-- =========================
+작성/수정 화면
+========================= -->
+<div id="writeView" style="display:none;">
+    <h2>글 작성</h2>
+    <input id="w_title" placeholder="제목"><br><br>
+    <input id="w_author" placeholder="작성자"><br><br>
+    <textarea id="w_content" placeholder="내용"></textarea><br><br>
 
-<input id="authorSearch" placeholder="작성자 검색">
-<button onclick="searchAuthor()">작성자 검색</button>
-
-<hr>
-
-<ul id="list"></ul>
+    <button onclick="save()">저장</button>
+    <button onclick="goMain()">메인</button>
+</div>
 
 <script>
+
+let currentId = null;
+let editFlag = false;
+
+/* =========================
+초기 로드
+========================= */
 function load() {
     fetch("/board")
         .then(res => res.json())
         .then(showList);
 }
 
-function create() {
-    fetch("/board", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            title: title.value,
-            content: content.value,
-            author: author.value
-        })
-    }).then(load);
-}
-
-function update() {
-    fetch("/board/" + id.value, {
-        method: "PUT",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            title: title.value,
-            content: content.value
-        })
-    }).then(load);
-}
-
-function remove(i) {
-    fetch("/board/" + i, { method: "DELETE" }).then(load);
-}
-
-function search() {
-    fetch("/board/search?keyword=" + keyword.value)
-        .then(res => res.json())
-        .then(showList);
-}
-
-function searchAuthor() {
-    fetch("/board/author?author=" + authorSearch.value)
-        .then(res => res.json())
-        .then(showList);
-}
-
+/* =========================
+리스트 출력
+========================= */
 function showList(data) {
+    mainView.style.display = "block";
+    detailView.style.display = "none";
+    writeView.style.display = "none";
+
+    if (data.length === 0) {
+        list.innerHTML = "<p>작성된 글이 없습니다.</p>";
+        return;
+    }
+
     list.innerHTML = "";
+
     data.forEach(item => {
         list.innerHTML += `
-            <li>
-                <b>${item.title}</b><br>
-                작성자: ${item.author}<br>
-                내용: ${item.content}<br>
-                ID: ${item.id}<br>
-                <button onclick="remove(${item.id})">삭제</button>
+            <div>
+                <b onclick="showDetail(${item.id})" style="cursor:pointer;">
+                    ${item.title}
+                </b><br>
+                글번호: ${item.id} /
+                작성자: ${item.author} /
+                작성일: ${item.createdAt}
                 <hr>
-            </li>
+            </div>
         `;
     });
 }
 
+/* =========================
+상세 보기
+========================= */
+function showDetail(id) {
+    fetch("/board/" + id)
+        .then(res => res.json())
+        .then(data => {
+            currentId = id;
+
+            mainView.style.display = "none";
+            detailView.style.display = "block";
+
+            d_title.innerText = data.title;
+            d_id.innerText = data.id;
+            d_author.innerText = data.author;
+            d_date.innerText = data.createdAt;
+            d_content.innerText = data.content;
+        });
+}
+
+/* =========================
+삭제
+========================= */
+function deletePost() {
+    fetch("/board/" + currentId, { method: "DELETE" })
+        .then(() => load());
+}
+
+/* =========================
+글쓰기 화면
+========================= */
+function showWrite() {
+    mainView.style.display = "none";
+    detailView.style.display = "none";
+    writeView.style.display = "block";
+
+    editFlag = false;
+
+    w_title.value = "";
+    w_author.value = "";
+    w_content.value = "";
+}
+
+/* =========================
+수정 모드
+========================= */
+function editMode() {
+    fetch("/board/" + currentId)
+        .then(res => res.json())
+        .then(data => {
+            showWrite();
+
+            editFlag = true;
+
+            w_title.value = data.title;
+            w_author.value = data.author;
+            w_content.value = data.content;
+        });
+}
+
+/* =========================
+저장 (작성 / 수정)
+========================= */
+function save() {
+    if (editFlag) {
+        fetch("/board/" + currentId, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                title: w_title.value,
+                content: w_content.value
+            })
+        }).then(load);
+    } else {
+        fetch("/board", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                title: w_title.value,
+                content: w_content.value,
+                author: w_author.value
+            })
+        }).then(load);
+    }
+}
+
+/* =========================
+메인으로
+========================= */
+function goMain() {
+    load();
+}
+
+/* =========================
+초기 실행
+========================= */
 load();
+
 </script>
 
 </body>
