@@ -41,26 +41,18 @@ body {
 </head>
 <body>
 
-<!-- =========================
-메인 화면
-========================= -->
+<!-- 메인 -->
 <div id="mainView">
-
     <div class="top">
         <button onclick="goMain()">메인</button>
         <div>게시판</div>
         <button onclick="showWrite()">글쓰기</button>
     </div>
-
     <div id="list"></div>
-
 </div>
 
-<!-- =========================
-상세 화면
-========================= -->
+<!-- 상세 -->
 <div id="detailView" style="display:none;">
-
     <div class="top">
         <button onclick="goMain()">메인</button>
         <div id="d_title"></div>
@@ -69,8 +61,8 @@ body {
 
     <div>
         글번호: <span id="d_id"></span>
-        &nbsp;&nbsp;
         작성자: <span id="d_author"></span>
+        조회수: <span id="d_view"></span>
     </div>
 
     <div class="content-box" id="d_content"></div>
@@ -79,29 +71,21 @@ body {
         <button onclick="editMode()">수정</button>
         <button onclick="deletePost()">삭제</button>
     </div>
-
 </div>
 
-<!-- =========================
-작성 화면
-========================= -->
+<!-- 작성 -->
 <div id="writeView" style="display:none;">
-
     <div class="top">
         <button onclick="goMain()">메인</button>
         <input id="w_title" placeholder="글제목">
         <button onclick="save()">저장</button>
     </div>
 
-    <!-- 🔥 작성자 추가 -->
-    <div>
-        <input id="w_author" placeholder="작성자">
-    </div>
+    <input id="w_author" placeholder="작성자">
 
     <div class="content-box">
         <textarea id="w_content" style="width:100%; height:100%;"></textarea>
     </div>
-
 </div>
 
 <script>
@@ -109,18 +93,17 @@ body {
 let currentId = null;
 let editFlag = false;
 
-/* =========================
-초기 로드
-========================= */
+function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+}
+
 function load() {
     fetch("/board")
         .then(res => res.json())
         .then(showList);
 }
 
-/* =========================
-리스트
-========================= */
 function showList(data) {
 
     mainView.style.display = "block";
@@ -134,18 +117,16 @@ function showList(data) {
 
     list.innerHTML = "";
 
-    data.forEach(item => {
+    data.forEach((item, index) => {
         list.innerHTML += `
             <div class="item" onclick="showDetail(${item.id})">
-                ${item.id} | ${item.title} | ${item.author} | ${item.createdAt}
+                ${index+1} | ${item.title} | ${item.author} |
+                ${formatDate(item.createdAt)} | 조회수: ${item.viewCount}
             </div>
         `;
     });
 }
 
-/* =========================
-상세 보기
-========================= */
 function showDetail(id) {
     fetch("/board/" + id)
         .then(res => res.json())
@@ -159,23 +140,17 @@ function showDetail(id) {
             d_title.innerText = data.title;
             d_id.innerText = data.id;
             d_author.innerText = data.author;
+            d_view.innerText = data.viewCount;
             d_content.innerText = data.content;
         });
 }
 
-/* =========================
-삭제
-========================= */
 function deletePost() {
     fetch("/board/" + currentId, { method: "DELETE" })
         .then(() => load());
 }
 
-/* =========================
-작성 화면
-========================= */
 function showWrite() {
-
     mainView.style.display = "none";
     detailView.style.display = "none";
     writeView.style.display = "block";
@@ -187,9 +162,6 @@ function showWrite() {
     w_content.value = "";
 }
 
-/* =========================
-수정 모드
-========================= */
 function editMode() {
     fetch("/board/" + currentId)
         .then(res => res.json())
@@ -199,14 +171,11 @@ function editMode() {
             editFlag = true;
 
             w_title.value = data.title;
-            w_author.value = data.author; // 🔥 작성자 유지
+            w_author.value = data.author;
             w_content.value = data.content;
         });
 }
 
-/* =========================
-저장
-========================= */
 function save() {
 
     if (editFlag) {
@@ -226,15 +195,12 @@ function save() {
             body: JSON.stringify({
                 title: w_title.value,
                 content: w_content.value,
-                author: w_author.value  // 🔥 입력값 사용
+                author: w_author.value
             })
         }).then(load);
     }
 }
 
-/* =========================
-메인 이동
-========================= */
 function goMain() {
     load();
 }

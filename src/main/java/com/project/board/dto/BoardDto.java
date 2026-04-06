@@ -1,7 +1,6 @@
 package com.project.board.dto;
 
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Getter
@@ -10,10 +9,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class BoardDto {
-
     private Long id;
     private String title;
     private String content;
     private String author;
     private LocalDateTime createdAt;
+    private int viewCount; // 🔥 추가
 }
