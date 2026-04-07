@@ -8,203 +8,243 @@
 body {
     width: 400px;
     margin: auto;
-    border: 3px solid black;
-    padding: 10px;
-    font-family: Arial;
-}
-
-.top {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-}
-
-.item {
-    border-bottom: 1px solid #ccc;
-    padding: 5px;
-    cursor: pointer;
-}
-
-.content-box {
     border: 2px solid black;
-    height: 300px;
     padding: 10px;
-    margin: 10px 0;
 }
-
-.bottom {
-    display: flex;
-    justify-content: space-between;
-}
+.top { display:flex; justify-content:space-between; }
+.item { border-bottom:1px solid #ccc; padding:5px; cursor:pointer; }
+.bottom { display:flex; justify-content:center; gap:5px; }
 </style>
 
 </head>
 <body>
 
+<!-- 로그인 -->
+<div>
+    <input id="username" placeholder="아이디">
+    <input id="password" type="password" placeholder="비밀번호">
+    <button onclick="signup()">회원가입</button>
+    <button onclick="login()">로그인</button>
+    <button onclick="logout()">로그아웃</button>
+</div>
+
+<hr>
+
+<!-- 검색 -->
+<div>
+    <input id="keyword" placeholder="제목 검색">
+    <input id="authorSearch" placeholder="작성자 검색">
+    <button onclick="load(0)">검색</button>
+</div>
+
+<hr>
+
 <!-- 메인 -->
 <div id="mainView">
+
     <div class="top">
-        <button onclick="goMain()">메인</button>
         <div>게시판</div>
         <button onclick="showWrite()">글쓰기</button>
     </div>
+
     <div id="list"></div>
+    <div class="bottom" id="paging"></div>
+
 </div>
 
 <!-- 상세 -->
 <div id="detailView" style="display:none;">
-    <div class="top">
-        <button onclick="goMain()">메인</button>
-        <div id="d_title"></div>
-        <button onclick="showWrite()">글쓰기</button>
-    </div>
+    <button onclick="goMain()">메인</button>
+
+    <h3 id="d_title"></h3>
 
     <div>
-        글번호: <span id="d_id"></span>
-        작성자: <span id="d_author"></span>
+        번호: <span id="d_id"></span> |
+        작성자: <span id="d_author"></span> |
         조회수: <span id="d_view"></span>
     </div>
 
-    <div class="content-box" id="d_content"></div>
+    <div id="d_content"></div>
 
-    <div class="bottom">
-        <button onclick="editMode()">수정</button>
-        <button onclick="deletePost()">삭제</button>
-    </div>
+    <button onclick="editMode()">수정</button>
+    <button onclick="deletePost()">삭제</button>
 </div>
 
 <!-- 작성 -->
 <div id="writeView" style="display:none;">
-    <div class="top">
-        <button onclick="goMain()">메인</button>
-        <input id="w_title" placeholder="글제목">
-        <button onclick="save()">저장</button>
-    </div>
+    <button onclick="goMain()">메인</button>
 
-    <input id="w_author" placeholder="작성자">
+    <input id="w_title" placeholder="제목"><br><br>
+    <textarea id="w_content"></textarea><br><br>
 
-    <div class="content-box">
-        <textarea id="w_content" style="width:100%; height:100%;"></textarea>
-    </div>
+    <button onclick="save()">저장</button>
 </div>
 
 <script>
 
+let loginUser = "";
 let currentId = null;
 let editFlag = false;
+let page = 0;
 
-function formatDate(dateStr) {
-    const d = new Date(dateStr);
-    return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
-}
-
-function load() {
-    fetch("/board")
-        .then(res => res.json())
-        .then(showList);
-}
-
-function showList(data) {
-
-    mainView.style.display = "block";
-    detailView.style.display = "none";
-    writeView.style.display = "none";
-
-    if (data.length === 0) {
-        list.innerHTML = "작성된 글이 없습니다.";
-        return;
-    }
-
-    list.innerHTML = "";
-
-    data.forEach((item, index) => {
-        list.innerHTML += `
-            <div class="item" onclick="showDetail(${item.id})">
-                ${index+1} | ${item.title} | ${item.author} |
-                ${formatDate(item.createdAt)} | 조회수: ${item.viewCount}
-            </div>
-        `;
+/* 로그인 상태 유지 */
+function checkLogin(){
+    fetch("/user/me")
+    .then(res=>res.text())
+    .then(user=>{
+        if(user){
+            loginUser = user;
+            console.log("로그인:", user);
+        }
     });
 }
 
-function showDetail(id) {
-    fetch("/board/" + id)
-        .then(res => res.json())
-        .then(data => {
-
-            currentId = id;
-
-            mainView.style.display = "none";
-            detailView.style.display = "block";
-
-            d_title.innerText = data.title;
-            d_id.innerText = data.id;
-            d_author.innerText = data.author;
-            d_view.innerText = data.viewCount;
-            d_content.innerText = data.content;
-        });
+/* 회원가입 */
+function signup(){
+    fetch(`/user/signup?username=${username.value}&password=${password.value}`,{
+        method:"POST"
+    }).then(()=>alert("가입 완료"));
 }
 
-function deletePost() {
-    fetch("/board/" + currentId, { method: "DELETE" })
-        .then(() => load());
+/* 로그인 */
+function login(){
+    fetch(`/user/login?username=${username.value}&password=${password.value}`,{
+        method:"POST"
+    })
+    .then(res=>res.text())
+    .then(r=>{
+        if(r==="OK"){
+            loginUser = username.value;
+            alert("로그인 성공");
+        }else{
+            alert("실패");
+        }
+    });
 }
 
-function showWrite() {
-    mainView.style.display = "none";
-    detailView.style.display = "none";
-    writeView.style.display = "block";
-
-    editFlag = false;
-
-    w_title.value = "";
-    w_author.value = "";
-    w_content.value = "";
+/* 로그아웃 */
+function logout(){
+    fetch("/user/logout",{method:"POST"})
+    .then(()=>{ loginUser=""; alert("로그아웃"); });
 }
 
-function editMode() {
-    fetch("/board/" + currentId)
-        .then(res => res.json())
-        .then(data => {
-
-            showWrite();
-            editFlag = true;
-
-            w_title.value = data.title;
-            w_author.value = data.author;
-            w_content.value = data.content;
-        });
+/* 날짜 */
+function formatDate(d){
+    let x=new Date(d);
+    return `${x.getFullYear()}/${x.getMonth()+1}/${x.getDate()} ${x.getHours()}:${x.getMinutes()}:${x.getSeconds()}`;
 }
 
-function save() {
+/* 리스트 */
+function load(p=0){
+    page=p;
 
-    if (editFlag) {
-        fetch("/board/" + currentId, {
-            method: "PUT",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                title: w_title.value,
-                content: w_content.value
-            })
-        }).then(load);
+    fetch(`/board?page=${p}&size=5&keyword=${keyword.value||""}&author=${authorSearch.value||""}`)
+    .then(res=>res.json())
+    .then(data=>{
+        showList(data.content);
+        showPaging(data.totalPages);
+    });
+}
 
-    } else {
-        fetch("/board", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                title: w_title.value,
-                content: w_content.value,
-                author: w_author.value
-            })
-        }).then(load);
+function showList(data){
+    list.innerHTML="";
+    data.forEach((i,idx)=>{
+        list.innerHTML+=`
+        <div class="item" onclick="showDetail(${i.id})">
+        ${idx+1} | ${i.title} | ${i.author} | ${formatDate(i.createdAt)} | 조회수:${i.viewCount}
+        </div>`;
+    });
+}
+
+/* 페이징 */
+function showPaging(total){
+    paging.innerHTML="";
+    for(let i=0;i<total;i++){
+        paging.innerHTML+=`<button onclick="load(${i})">${i+1}</button>`;
     }
 }
 
-function goMain() {
-    load();
+/* 상세 */
+function showDetail(id){
+    fetch("/board/"+id)
+    .then(res=>res.json())
+    .then(d=>{
+        currentId=id;
+        mainView.style.display="none";
+        detailView.style.display="block";
+
+        d_title.innerText=d.title;
+        d_id.innerText=d.id;
+        d_author.innerText=d.author;
+        d_view.innerText=d.viewCount;
+        d_content.innerText=d.content;
+    });
 }
 
+/* 글쓰기 */
+function showWrite(){
+    if(!loginUser){
+        alert("로그인 필요");
+        return;
+    }
+    mainView.style.display="none";
+    writeView.style.display="block";
+
+    editFlag=false;
+    w_title.value="";
+    w_content.value="";
+}
+
+/* 수정 */
+function editMode(){
+    fetch("/board/"+currentId)
+    .then(res=>res.json())
+    .then(d=>{
+        showWrite();
+        editFlag=true;
+        w_title.value=d.title;
+        w_content.value=d.content;
+    });
+}
+
+/* 저장 */
+function save(){
+    if(editFlag){
+        fetch("/board/"+currentId,{
+            method:"PUT",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({
+                title:w_title.value,
+                content:w_content.value
+            })
+        }).then(()=>load(page));
+    }else{
+        fetch("/board",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({
+                title:w_title.value,
+                content:w_content.value
+            })
+        }).then(()=>load(page));
+    }
+}
+
+/* 삭제 */
+function deletePost(){
+    fetch("/board/"+currentId,{method:"DELETE"})
+    .then(()=>load(page));
+}
+
+/* 메인 */
+function goMain(){
+    detailView.style.display="none";
+    writeView.style.display="none";
+    mainView.style.display="block";
+    load(page);
+}
+
+checkLogin();
 load();
 
 </script>

@@ -6,55 +6,40 @@ import java.time.LocalDateTime;
 @Entity
 public class Board {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
-    private String title;
+    private int viewCount = 0;
 
     @Column(columnDefinition = "TEXT")
     private String content;
-
-    @Column(nullable = false, updatable = false)
+    private String title;
+    private String author;
     private LocalDateTime createdAt;
 
-    @Column(nullable = false, updatable = false)
-    private String author;
+    protected Board(){}
 
-    @Column(nullable = false)
-    private int viewCount = 0;
+    public static Board create(String title, String content, String author){
+        Board b = new Board();
+        b.title = title;
+        b.content = content;
+        b.author = author;
+        b.createdAt = LocalDateTime.now();
+        return b;
+    }
 
-    protected Board() {}
-
-    private Board(String title, String content, String author) {
+    public void update(String title, String content){
         this.title = title;
         this.content = content;
-        this.author = author;
     }
 
-    public static Board create(String title, String content, String author) {
-        return new Board(title, content, author);
-    }
-
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    public void increaseViewCount() {
+    public void increaseViewCount(){
         this.viewCount++;
     }
 
-    public void update(String title, String content) {
-        this.title = title;
-        this.content = content;
-    }
-
-    public Long getId() { return id; }
-    public String getTitle() { return title; }
-    public String getContent() { return content; }
-    public String getAuthor() { return author; }
-    public int getViewCount() { return viewCount; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public Long getId(){ return id; }
+    public String getTitle(){ return title; }
+    public String getContent(){ return content; }
+    public String getAuthor(){ return author; }
+    public int getViewCount(){ return viewCount; }
+    public LocalDateTime getCreatedAt(){ return createdAt; }
 }
