@@ -77,4 +77,19 @@ public class BoardService {
                 .viewCount(b.getViewCount()) // 🔥 추가
                 .build();
     }
+ // 제목 검색
+    public List<BoardDto> searchByTitle(String keyword) {
+        return boardRepository.findByTitleContaining(keyword)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    // 작성자 검색
+    public List<BoardDto> searchByAuthor(String author) {
+        return boardRepository.findByAuthor(author)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
 }
