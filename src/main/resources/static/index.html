@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
 <meta charset="UTF-8">
@@ -14,18 +15,39 @@ body {
 .top { display:flex; justify-content:space-between; }
 .item { border-bottom:1px solid #ccc; padding:5px; cursor:pointer; }
 .bottom { display:flex; justify-content:center; gap:5px; }
+.hidden { display:none; }
 </style>
 
 </head>
 <body>
 
-<!-- 로그인 -->
-<div>
-    <input id="username" placeholder="아이디">
-    <input id="password" type="password" placeholder="비밀번호">
-    <button onclick="signup()">회원가입</button>
-    <button onclick="login()">로그인</button>
+<!-- 로그인 화면 -->
+
+<div id="loginView">
+    <h3>Please Sign In</h3>
+
+```
+<input id="username" placeholder="아이디"><br><br>
+<input id="password" type="password" placeholder="비밀번호"><br><br>
+
+<button onclick="login()">로그인</button>
+<button onclick="signup()">회원가입</button>
+<button onclick="guestLogin()">비회원 입장</button>
+```
+
+</div>
+
+<hr>
+
+<!-- 메인 -->
+
+<div id="mainView" class="hidden">
+
+```
+<div class="top">
+    <div id="welcomeText">게시판</div>
     <button onclick="logout()">로그아웃</button>
+    <button onclick="showWrite()">글쓰기</button>
 </div>
 
 <hr>
@@ -39,45 +61,46 @@ body {
 
 <hr>
 
-<!-- 메인 -->
-<div id="mainView">
-
-    <div class="top">
-        <div>게시판</div>
-        <button onclick="showWrite()">글쓰기</button>
-    </div>
-
-    <div id="list"></div>
-    <div class="bottom" id="paging"></div>
+<div id="list"></div>
+<div class="bottom" id="paging"></div>
+```
 
 </div>
 
 <!-- 상세 -->
-<div id="detailView" style="display:none;">
+
+<div id="detailView" class="hidden">
     <button onclick="goMain()">메인</button>
 
-    <h3 id="d_title"></h3>
+```
+<h3 id="d_title"></h3>
 
-    <div>
-        번호: <span id="d_id"></span> |
-        작성자: <span id="d_author"></span> |
-        조회수: <span id="d_view"></span>
-    </div>
+<div>
+    번호: <span id="d_id"></span> |
+    작성자: <span id="d_author"></span> |
+    조회수: <span id="d_view"></span>
+</div>
 
-    <div id="d_content"></div>
+<div id="d_content"></div>
 
-    <button onclick="editMode()">수정</button>
-    <button onclick="deletePost()">삭제</button>
+<button onclick="editMode()">수정</button>
+<button onclick="deletePost()">삭제</button>
+```
+
 </div>
 
 <!-- 작성 -->
-<div id="writeView" style="display:none;">
+
+<div id="writeView" class="hidden">
     <button onclick="goMain()">메인</button>
 
-    <input id="w_title" placeholder="제목"><br><br>
-    <textarea id="w_content"></textarea><br><br>
+```
+<input id="w_title" placeholder="제목"><br><br>
+<textarea id="w_content"></textarea><br><br>
 
-    <button onclick="save()">저장</button>
+<button onclick="save()">저장</button>
+```
+
 </div>
 
 <script>
@@ -87,16 +110,38 @@ let currentId = null;
 let editFlag = false;
 let page = 0;
 
-/* 로그인 상태 유지 */
+/* 화면 전환 */
+function show(view){
+    loginView.classList.add("hidden");
+    mainView.classList.add("hidden");
+    detailView.classList.add("hidden");
+    writeView.classList.add("hidden");
+
+    view.classList.remove("hidden");
+}
+
+/* 로그인 상태 체크 */
 function checkLogin(){
     fetch("/user/me")
     .then(res=>res.text())
     .then(user=>{
         if(user){
             loginUser = user;
-            console.log("로그인:", user);
+            enterMain();
+        }else{
+            show(loginView);
         }
     });
+}
+
+/* 메인 진입 */
+function enterMain(){
+    welcomeText.innerText = loginUser === "GUEST" 
+        ? "비회원 모드" 
+        : loginUser + "님 환영합니다";
+
+    show(mainView);
+    load();
 }
 
 /* 회원가입 */
@@ -116,22 +161,33 @@ function login(){
         if(r==="OK"){
             loginUser = username.value;
             alert("로그인 성공");
+            enterMain();
         }else{
-            alert("실패");
+            alert("로그인 실패");
         }
     });
+}
+
+/* 비회원 */
+function guestLogin(){
+    loginUser = "GUEST";
+    alert("비회원으로 입장합니다");
+    enterMain();
 }
 
 /* 로그아웃 */
 function logout(){
     fetch("/user/logout",{method:"POST"})
-    .then(()=>{ loginUser=""; alert("로그아웃"); });
+    .then(()=>{
+        loginUser="";
+        show(loginView);
+    });
 }
 
 /* 날짜 */
 function formatDate(d){
     let x=new Date(d);
-    return `${x.getFullYear()}/${x.getMonth()+1}/${x.getDate()} ${x.getHours()}:${x.getMinutes()}:${x.getSeconds()}`;
+    return `${x.getFullYear()}/${x.getMonth()+1}/${x.getDate()} ${x.getHours()}:${x.getMinutes()}`;
 }
 
 /* 리스트 */
@@ -170,8 +226,8 @@ function showDetail(id){
     .then(res=>res.json())
     .then(d=>{
         currentId=id;
-        mainView.style.display="none";
-        detailView.style.display="block";
+
+        show(detailView);
 
         d_title.innerText=d.title;
         d_id.innerText=d.id;
@@ -183,12 +239,12 @@ function showDetail(id){
 
 /* 글쓰기 */
 function showWrite(){
-    if(!loginUser){
-        alert("로그인 필요");
+    if(!loginUser || loginUser==="GUEST"){
+        alert("회원만 글쓰기 가능합니다");
         return;
     }
-    mainView.style.display="none";
-    writeView.style.display="block";
+
+    show(writeView);
 
     editFlag=false;
     w_title.value="";
@@ -217,7 +273,7 @@ function save(){
                 title:w_title.value,
                 content:w_content.value
             })
-        }).then(()=>load(page));
+        }).then(()=>goMain());
     }else{
         fetch("/board",{
             method:"POST",
@@ -226,26 +282,24 @@ function save(){
                 title:w_title.value,
                 content:w_content.value
             })
-        }).then(()=>load(page));
+        }).then(()=>goMain());
     }
 }
 
 /* 삭제 */
 function deletePost(){
     fetch("/board/"+currentId,{method:"DELETE"})
-    .then(()=>load(page));
+    .then(()=>goMain());
 }
 
 /* 메인 */
 function goMain(){
-    detailView.style.display="none";
-    writeView.style.display="none";
-    mainView.style.display="block";
+    show(mainView);
     load(page);
 }
 
+/* 시작 */
 checkLogin();
-load();
 
 </script>
 
