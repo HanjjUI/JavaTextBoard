@@ -41,11 +41,6 @@ public class BoardController {
         return "OK";
     }
     
-    @GetMapping("/test")
-    public String test(){
-        return "OK";
-    }
-
     // 投稿一覧取得
     @GetMapping("/list")
     public List<BoardDto> list(){

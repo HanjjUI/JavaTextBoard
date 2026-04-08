@@ -3,17 +3,15 @@ package com.project.board.controller;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 // 画面表示用コントローラー
 @Controller
 public class ViewController {
 
-	@GetMapping("/")
-	@ResponseBody
-	public String index(){
-	    return "HELLO";
-	}
+    @GetMapping("/")
+    public String index(){
+        return "index";
+    }
 
     @GetMapping("/login")
     public String login(){
@@ -30,10 +28,6 @@ public class ViewController {
         return "board-list";
     }
     
-    @GetMapping("/test")
-    public String test(){
-        return "OK";
-    }
     @GetMapping("/board/write")
     public String write(HttpSession session){
 
