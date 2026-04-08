@@ -7,88 +7,61 @@
 <style>
 body {
     font-family: Arial;
-    background: #e9eef2;
+    background: #f5f5f5;
     margin: 0;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
 }
 
-/* 전체 */
+/* 전체 박스 */
 .container {
-    width: 420px;
-    height: 90vh;
+    width: 800px;
+    height: 900px;
+    margin: 40px auto;
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-
+    border: 2px solid black;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
 }
 
 /* ===== 상단 ===== */
 .header {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid black;
     padding: 10px;
-    border-bottom: 1px solid #ddd;
 }
 
-/* 상단 줄 */
-.top-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.main-btn {
+    width: 80px;
 }
 
-/* 로그인 영역 */
-.login-area {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-#loginForm {
-    display: flex;
-    gap: 5px;
-}
-
-#loginForm input {
-    width: 70px;
-    padding: 4px;
-    font-size: 12px;
-}
-
-#userInfo {
-    display: none;
-    font-size: 12px;
-}
-
-/* 제목 */
 .title {
+    flex: 1;
     text-align: center;
-    font-weight: bold;
-    font-size: 16px;
-    margin: 10px 0;
+    border: 1px solid black;
+    padding: 5px;
+}
+
+.auth {
+    display: flex;
+    gap: 10px;
 }
 
 /* ===== 검색 ===== */
 .search {
     display: flex;
-    gap: 5px;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 2px solid black;
 }
 
 .search input {
-    width: 70px;
+    width: 100px;
     padding: 5px;
-    font-size: 12px;
 }
 
-.search button {
-    padding: 5px 6px;
-    font-size: 12px;
-    cursor: pointer;
+.search .title-input {
+    width: 250px;
 }
 
 /* ===== 게시판 ===== */
@@ -103,36 +76,40 @@ table {
     border-collapse: collapse;
 }
 
-th {
-    background: #f5f5f5;
-    font-size: 12px;
-}
-
 th, td {
-    border-bottom: 1px solid #eee;
-    padding: 6px;
+    border: 1px solid black;
+    padding: 8px;
     text-align: center;
-    font-size: 12px;
 }
 
 /* 빈 상태 */
 .empty {
     text-align: center;
-    color: gray;
-    margin-top: 100px;
+    margin-top: 200px;
 }
 
 /* ===== 하단 ===== */
 .footer {
+    border-top: 2px solid black;
     padding: 10px;
-    border-top: 1px solid #ddd;
-    text-align: right;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pagination {
+    display: flex;
+    gap: 10px;
+}
+
+.page-info {
+    flex: 1;
+    text-align: center;
 }
 
 .write-btn {
-    padding: 6px 10px;
-    font-size: 12px;
-    cursor: pointer;
+    width: 100px;
 }
 </style>
 </head>
@@ -144,114 +121,74 @@ th, td {
     <!-- 상단 -->
     <div class="header">
 
-        <div class="top-row">
-            <button onclick="location.href='/'">Main</button>
+        <button class="main-btn" onclick="location.href='/'">Main</button>
 
-            <div class="login-area">
+        <div class="title">掲示板タイトル</div>
 
-                <!-- 로그인 입력 -->
-                <div id="loginForm">
-                    <input id="username" placeholder="ID">
-                    <input id="password" type="password" placeholder="PW">
-                </div>
-
-                <!-- 로그인 상태 -->
-                <div id="userInfo">
-                    <span id="welcome"></span>
-                    <button onclick="logout()">ログアウト</button>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="title">今日の出来事は</div>
-
-        <!-- 검색 + 버튼 -->
-        <div class="search">
-            <input placeholder="番号">
-            <input placeholder="タイトル">
-            <input placeholder="作成者">
-
-            <button>検索</button>
+        <div class="auth">
             <button onclick="login()">ログイン</button>
-            <button onclick="location.href='/signup'">登録</button>
+            <button onclick="location.href='/signup'">会員登録</button>
         </div>
 
     </div>
 
+    <!-- 검색 -->
+    <div class="search">
+        <span>番号</span>
+        <input>
+
+        <span>タイトル</span>
+        <input class="title-input">
+
+        <span>作成者</span>
+        <input>
+
+        <button>検索</button>
+    </div>
+
     <!-- 게시판 -->
     <div class="content">
+
         <table>
             <thead>
                 <tr>
                     <th>番号</th>
                     <th>タイトル</th>
                     <th>作成者</th>
-                    <th>日付</th>
+                    <th>作成日</th>
+                    <th>閲覧数</th>
                 </tr>
             </thead>
             <tbody id="boardBody"></tbody>
         </table>
 
         <div class="empty">投稿がありません</div>
+
     </div>
 
     <!-- 하단 -->
     <div class="footer">
+
+        <div class="pagination">
+            <button>前へ</button>
+            <button>次へ</button>
+        </div>
+
+        <div class="page-info">
+            1 / 1 ページ
+        </div>
+
         <button class="write-btn" onclick="goWrite()">投稿</button>
+
     </div>
 
 </div>
 
 <script>
-// 페이지 로드시 로그인 체크
-window.onload = function(){
-    checkLogin();
-};
-
-// 로그인 상태 확인
-function checkLogin(){
-    fetch("/user/me")
-    .then(res => res.text())
-    .then(user => {
-
-        if(user && user !== "null"){
-            document.getElementById("loginForm").style.display = "none";
-            document.getElementById("userInfo").style.display = "block";
-            document.getElementById("welcome").innerText = user + " さん";
-        }
-    });
-}
-
-// 로그인
 function login(){
-    const u = document.getElementById("username").value.trim();
-    const p = document.getElementById("password").value.trim();
-
-    fetch("/user/login", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: "u=" + encodeURIComponent(u) + "&p=" + encodeURIComponent(p)
-    })
-    .then(res => res.text())
-    .then(result => {
-        if(result === "OK"){
-            checkLogin();
-        } else {
-            alert("ログイン失敗");
-        }
-    });
+    alert("ログイン処理 연결 필요");
 }
 
-// 로그아웃
-function logout(){
-    fetch("/user/logout", { method: "POST" })
-    .then(() => location.reload());
-}
-
-// 글쓰기 이동
 function goWrite(){
     fetch("/user/me")
     .then(res => res.text())
