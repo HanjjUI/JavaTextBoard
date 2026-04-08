@@ -27,7 +27,11 @@ public class ViewController {
     public String board(){
         return "board-list";
     }
-
+    
+    @GetMapping("/test")
+    public String test(){
+        return "OK";
+    }
     @GetMapping("/board/write")
     public String write(HttpSession session){
 
