@@ -41,7 +41,10 @@
 <input id="u" placeholder="ユーザー名"><br>
 <input id="p" type="password" placeholder="パスワード"><br>
 
+<div>
 <button onclick="signup()">登録</button>
+<button onclick="goMain()">メインに戻る</button>
+</div>
 
 <p id="msg"></p>
 
@@ -85,6 +88,10 @@ function signup(){
     .catch(() => {
         msg.innerText = "通信エラーが発生しました";
     });
+}
+
+function goMain(){
+	location.href = "/";
 }
 </script>
 
