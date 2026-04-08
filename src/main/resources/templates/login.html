@@ -70,7 +70,7 @@ function login(){
     })
     .then(function(res){
         if(!res.ok){
-            throw new Error();
+        throw new Error();
         }
         return res.text();
     })
