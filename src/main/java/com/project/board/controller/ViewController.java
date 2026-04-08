@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-// 画面表示用コントローラー
 @Controller
 public class ViewController {
 
@@ -13,8 +12,18 @@ public class ViewController {
         return "index";
     }
 
+    @GetMapping("/index")
+    public String root(){
+        return "index";
+    }
+
     @GetMapping("/login")
-    public String login(){
+    public String login(HttpSession session){
+
+        if(session.getAttribute("loginUser") != null){
+            return "redirect:/";
+        }
+
         return "login";
     }
 
@@ -27,11 +36,10 @@ public class ViewController {
     public String board(){
         return "board-list";
     }
-    
+
     @GetMapping("/board/write")
     public String write(HttpSession session){
 
-        // ログインチェック
         if(session.getAttribute("loginUser") == null){
             return "redirect:/login";
         }

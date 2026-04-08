@@ -16,7 +16,6 @@ body {
     height: 100vh;
 }
 
-/* 메인 */
 .container {
     width: 420px;
     height: 90vh;
@@ -29,7 +28,6 @@ body {
     overflow: hidden;
 }
 
-/* ===== 상단 ===== */
 .header {
     padding: 10px;
     border-bottom: 1px solid #ddd;
@@ -41,19 +39,22 @@ body {
     align-items: center;
 }
 
-/* 로그인 입력창 */
-.login-input {
+.login-area {
     display: flex;
     gap: 5px;
 }
 
-.login-input input {
-    width: 90px;
+#loginForm input {
+    width: 80px;
     padding: 5px;
     font-size: 12px;
 }
 
-/* 제목 */
+#userInfo {
+    display: none;
+    font-size: 12px;
+}
+
 .title {
     text-align: center;
     font-weight: bold;
@@ -61,7 +62,6 @@ body {
     margin-top: 10px;
 }
 
-/* ===== 검색 ===== */
 .search {
     margin-top: 10px;
     display: flex;
@@ -78,7 +78,6 @@ body {
     padding: 6px;
 }
 
-/* ===== 게시판 ===== */
 .content {
     flex: 1;
     overflow-y: auto;
@@ -104,7 +103,6 @@ th, td {
     color: gray;
 }
 
-/* ===== 하단 ===== */
 .footer {
     padding: 10px;
     border-top: 1px solid #ddd;
@@ -112,11 +110,6 @@ th, td {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.pagination {
-    display: flex;
-    gap: 5px;
 }
 
 .write-btn {
@@ -129,37 +122,42 @@ th, td {
 
 <div class="container">
 
-    <!-- 상단 -->
     <div class="header">
 
         <div class="top-row">
-            <button onclick="location.href='/index'">Main</button>
+            <button onclick="location.href='/'">Main</button>
 
-            <!-- 🔥 로그인 입력창 -->
-            <div class="login-input">
-                <input id="username" placeholder="ID">
-                <input id="password" type="password" placeholder="PW">
+            <div class="login-area">
+
+                <!-- 로그인 입력 -->
+                <div id="loginForm">
+                    <input id="username" placeholder="ID">
+                    <input id="password" type="password" placeholder="PW">
+                </div>
+
+                <!-- 로그인 상태 -->
+                <div id="userInfo">
+                    <span id="welcome"></span>
+                    <button onclick="logout()">ログアウト</button>
+                </div>
+
             </div>
         </div>
 
         <div class="title">今日の出来事は</div>
 
-        <!-- 검색 + 로그인 버튼 -->
         <div class="search">
             <input placeholder="番号">
             <input placeholder="タイトル">
             <input placeholder="作成者">
 
             <button>検索</button>
-
-            <!-- 🔥 버튼 이동 -->
             <button onclick="login()">ログイン</button>
             <button onclick="location.href='/signup'">会員登録</button>
         </div>
 
     </div>
 
-    <!-- 게시판 -->
     <div class="content">
         <table>
             <thead>
@@ -173,43 +171,72 @@ th, td {
             <tbody id="boardBody"></tbody>
         </table>
 
-        <div class="empty" id="emptyMessage">
-            投稿がありません
-        </div>
+        <div class="empty">投稿がありません</div>
     </div>
 
-    <!-- 하단 -->
     <div class="footer">
-        <div class="pagination">
-            <button>前へ</button>
-            <button>次へ</button>
-        </div>
-
-        <button class="write-btn">投稿</button>
+        <button onclick="goWrite()">投稿</button>
     </div>
 
 </div>
 
 <script>
-// 🔥 로그인 기능
+// 로그인 상태 체크
+window.onload = function(){
+    checkLogin();
+};
+
+function checkLogin(){
+    fetch("/user/me")
+    .then(res => res.text())
+    .then(user => {
+
+        if(user && user !== "null"){
+            document.getElementById("loginForm").style.display = "none";
+            document.getElementById("userInfo").style.display = "block";
+            document.getElementById("welcome").innerText = user + " さん";
+        }
+    });
+}
+
+// 로그인
 function login(){
     const u = document.getElementById("username").value.trim();
     const p = document.getElementById("password").value.trim();
 
-    fetch("/login", {
+    fetch("/user/login", {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
         },
-        body: "username=" + encodeURIComponent(u) + "&password=" + encodeURIComponent(p)
+        body: "u=" + encodeURIComponent(u) + "&p=" + encodeURIComponent(p)
     })
     .then(res => res.text())
     .then(result => {
-        if(result === "ok"){
-            alert("ログイン成功");
-            location.reload();
+        if(result === "OK"){
+            checkLogin();
         } else {
             alert("ログイン失敗");
+        }
+    });
+}
+
+// 로그아웃
+function logout(){
+    fetch("/user/logout", { method: "POST" })
+    .then(() => location.reload());
+}
+
+// 글쓰기 이동 (로그인 체크)
+function goWrite(){
+    fetch("/user/me")
+    .then(res => res.text())
+    .then(user => {
+        if(user === "null"){
+            alert("ログインしてください");
+            location.href = "/login";
+        } else {
+            location.href = "/board/write";
         }
     });
 }
