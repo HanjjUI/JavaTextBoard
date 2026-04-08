@@ -5,34 +5,60 @@ import com.project.board.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 
+// ユーザー関連APIコントローラー
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
-    private final UserService s;
+    private final UserService service;
 
-    public UserController(UserService s){ this.s=s; }
+    public UserController(UserService service){
+        this.service = service;
+    }
 
+    // 会員登録処理
     @PostMapping("/signup")
-    public void signup(String u,String p){ s.signup(u,p); }
+    public String signup(String u, String p){
 
+        try {
+            service.signup(u, p);
+            return "OK";
+        } catch (Exception e){
+            return "DUPLICATE";
+        }
+    }
+
+    // ログイン処理
     @PostMapping("/login")
-    public String login(String u,String p,HttpSession session){
-        User user = s.login(u,p);
-        if(user!=null){
+    public String login(String u, String p, HttpSession session){
+
+        User user = service.login(u, p);
+
+        if(user != null){
             session.setAttribute("loginUser", user.getUsername());
             return "OK";
         }
+
         return "FAIL";
     }
 
-    @GetMapping("/me")
-    public String me(HttpSession session){
-        return (String)session.getAttribute("loginUser");
+    // ログアウト処理
+    @PostMapping("/logout")
+    public String logout(HttpSession session){
+        session.invalidate();
+        return "OK";
     }
 
-    @PostMapping("/logout")
-    public void logout(HttpSession session){
-        session.invalidate();
+    // ログイン状態確認
+    @GetMapping("/me")
+    public String me(HttpSession session){
+
+        String user = (String)session.getAttribute("loginUser");
+
+        if(user == null){
+            return "";
+        }
+
+        return user;
     }
 }

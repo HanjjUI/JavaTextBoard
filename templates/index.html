@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>掲示板アプリ</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .menu {
+            margin: 20px;
+        }
+
+        a {
+            margin: 10px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        #user {
+            margin-top: 20px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>掲示板アプリ</h1>
+
+<div class="menu">
+    <a href="/login">ログイン</a>
+    <a href="/board">掲示板</a>
+</div>
+
+<div id="user"></div>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>掲示板アプリ</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+        }
+
+        .menu {
+            margin: 20px;
+        }
+
+        a {
+            margin: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            color: #333;
+        }
+
+        a:hover {
+            color: #007bff;
+        }
+
+        #user {
+            margin-top: 30px;
+            font-size: 14px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>掲示板アプリ</h1>
+
+<div class="menu">
+    <a href="/login">ログイン</a>
+    <a href="/board">掲示板</a>
+</div>
+
+<div id="user">読み込み中...</div>
+
+<script>
+// ログイン状態確認
+fetch("/user/me")
+.then(res => res.text())
+.then(user => {
+
+    const userDiv = document.getElementById("user");
+
+    if(user && user !== "null"){
+        userDiv.innerHTML = `
+            <p><strong>${user}</strong> さんログイン中</p>
+            <form action="/user/logout" method="post">
+                <button>ログアウト</button>
+            </form>
+        `;
+    } else {
+        userDiv.innerHTML = `
+            <p>未ログイン</p>
+            <a href="/login">ログインはこちら</a>
+        `;
+    }
+})
+.catch(() => {
+    document.getElementById("user").innerText = "通信エラー";
+});
+</script>
+
+</body>
+</html>
+<script>
+// ログイン状態確認
+fetch("/user/me")
+.then(res => res.text())
+.then(user => {
+
+    const userDiv = document.getElementById("user");
+
+    if(user && user !== "null"){
+        userDiv.innerHTML = `
+            <p>${user} さんログイン中</p>
+            <form action="/user/logout" method="post">
+                <button>ログアウト</button>
+            </form>
+        `;
+    } else {
+        userDiv.innerHTML = "<p>未ログイン</p>";
+    }
+});
+</script>
+
+</body>
+</html>

@@ -6,39 +6,45 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+// 掲示板APIコントローラー
 @RestController
 @RequestMapping("/board")
 public class BoardController {
 
-    private final BoardService s;
+    private final BoardService service;
 
-    public BoardController(BoardService s){ this.s=s; }
-
-    @GetMapping
-    public Page<BoardDto> getAll(Pageable p,
-        @RequestParam(required=false) String keyword,
-        @RequestParam(required=false) String author){
-        return s.findAll(p,keyword,author);
+    public BoardController(BoardService service){
+        this.service = service;
     }
 
-    @GetMapping("/{id}")
-    public BoardDto get(@PathVariable Long id){
-        return s.findById(id);
+    // 投稿作成
+    @PostMapping("/write")
+    public String write(String title, String content, HttpSession session){
+
+        String user = (String)session.getAttribute("loginUser");
+
+        // ログインチェック
+        if(user == null){
+            return "LOGIN_REQUIRED";
+        }
+
+        // DTO 생성
+        BoardDto dto = BoardDto.builder()
+                .title(title)
+                .content(content)
+                .build();
+
+        service.save(dto, user);
+
+        return "OK";
     }
 
-    @PostMapping
-    public BoardDto create(@RequestBody BoardDto d,HttpSession session){
-        return s.save(d,(String)session.getAttribute("loginUser"));
-    }
-
-    @PutMapping("/{id}")
-    public BoardDto update(@PathVariable Long id,
-        @RequestBody BoardDto d,HttpSession session){
-        return s.update(id,d,(String)session.getAttribute("loginUser"));
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id,HttpSession session){
-        s.delete(id,(String)session.getAttribute("loginUser"));
+    // 投稿一覧取得
+    @GetMapping("/list")
+    public List<BoardDto> list(){
+        return service.findAll(PageRequest.of(0, 10), "", "")
+                .getContent();
     }
 }

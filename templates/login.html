@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ログイン</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        input {
+            width: 250px;
+            margin: 10px;
+            padding: 8px;
+        }
+
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+
+        #msg {
+            color: red;
+            margin-top: 10px;
+        }
+
+        a {
+            display: block;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>ログイン</h2>
+
+<input id="u" placeholder="ユーザー名"><br>
+<input id="p" type="password" placeholder="パスワード"><br>
+
+<button onclick="login()">ログイン</button>
+
+<p id="msg"></p>
+
+<a href="/signup">新規登録</a>
+
+<script>
+// ログイン処理
+function login(){
+
+    const u = document.getElementById("u").value.trim();
+    const p = document.getElementById("p").value.trim();
+    const msg = document.getElementById("msg");
+
+    // 入力チェック
+    if(!u || !p){
+        msg.innerText = "ユーザー名とパスワードを入力してください";
+        return;
+    }
+
+    fetch("/user/login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `u=${encodeURIComponent(u)}&p=${encodeURIComponent(p)}`
+    })
+    .then(res => res.text())
+    .then(data => {
+
+        if(data === "OK"){
+            alert("ログイン成功");
+            location.href = "/";
+        }
+        else if(data === "FAIL"){
+            msg.innerText = "ユーザー名またはパスワードが間違っています";
+        }
+        else{
+            msg.innerText = "エラーが発生しました";
+        }
+    })
+    .catch(() => {
+        msg.innerText = "通信エラーが発生しました";
+    });
+}
+</script>
+
+</body>
+</html>
