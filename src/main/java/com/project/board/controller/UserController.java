@@ -20,6 +20,8 @@ public class UserController {
     @PostMapping("/signup")
     public String signup(String u, String p){
 
+    	System.out.println("u=["+u+"]");
+    	System.out.println("p=["+p+"]");
         try {
             service.signup(u, p);
             return "OK";
