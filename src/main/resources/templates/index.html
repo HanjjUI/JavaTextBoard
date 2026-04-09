@@ -304,9 +304,41 @@ function goWrite(){
     });
 }
 
+function loadBoard(){
+    fetch("/board/list")
+    .then(res => res.json())
+    .then(data => {
+
+        const body = document.getElementById("boardBody");
+        const empty = document.getElementById("emptyMsg");
+
+        body.innerHTML = "";
+
+        if(data.length === 0){
+            empty.style.display = "block";
+            return;
+        }
+
+        empty.style.display = "none";
+
+        data.forEach((b, index) => {
+            body.innerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><a href="#">${b.title}</a></td>
+                    <td>${b.author}</td>
+                    <td>${b.createdAt ? b.createdAt.replace('T',' ').substring(0,16) : ''}</td>
+                    <td>${b.viewCount}</td>
+                </tr>
+            `;
+        });
+    });
+}
+
 /* 초기 실행 */
 window.onload = function(){
     checkLogin();
+    loadBoard();
 };
 </script>
 
