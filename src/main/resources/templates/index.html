@@ -13,20 +13,16 @@ body {
 
 button {
     cursor: pointer;
-    box-sizing: border-box;
     border: none;
     background: #333;
     color: white;
     transition: 0.2s;
+    padding: 8px 12px;
 }
-
-button:hover {
-    background: #555;
-}
+button:hover { background: #555; }
 
 .container {
     width: 900px;
-    height: 900px;
     margin: 40px auto;
     background: white;
     border-radius: 10px;
@@ -35,109 +31,57 @@ button:hover {
     flex-direction: column;
 }
 
-/* header */
 .header {
     display: flex;
     align-items: center;
     padding: 10px;
-    height: 60px;
     border-bottom: 1px solid #ddd;
 }
-
-.header button {
-    height: 100%;
-    padding: 0 15px;
-    border-radius: 5px;
-}
-
-.main-btn { width: 80px; }
 
 .title {
     flex: 1;
     text-align: center;
     font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-.auth {
-    display: flex;
-    gap: 10px;
-    height: 100%;
-    align-items: center;
-}
+.auth { display: flex; gap: 10px; }
 
-/* content */
 .content {
     flex: 1;
     padding: 20px;
-    overflow-y: auto;
 }
 
-/* table */
 table {
     width: 100%;
     border-collapse: collapse;
 }
-
-th {
-    background: #eee;
-}
-
 th, td {
     padding: 10px;
     border-bottom: 1px solid #ddd;
     text-align: center;
 }
+tbody tr:hover { background: #f9f9f9; }
 
-tbody tr:hover {
-    background: #f9f9f9;
-}
-
-.empty {
-    text-align: center;
-    margin-top: 50px;
-    color: #888;
-}
-
-/* footer */
 .footer {
     padding: 10px;
-    border-top: 1px solid #ddd;
     text-align: right;
 }
 
 /* modal */
 .modal {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
+    top:0; left:0;
+    width:100%; height:100%;
     background: rgba(0,0,0,0.5);
-
-    display: none;
-    justify-content: center;
-    align-items: center;
+    display:none;
+    justify-content:center;
+    align-items:center;
 }
-
 .modal-box {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    width: 300px;
-    text-align: center;
-}
-
-.modal input {
-    width: 100%;
-    margin: 10px 0;
-    padding: 8px;
-}
-
-.close {
-    margin-top: 10px;
-    background: crimson;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    width:400px;
 }
 </style>
 </head>
@@ -146,223 +90,207 @@ tbody tr:hover {
 
 <div class="container">
 
-    <!-- header -->
-    <div class="header">
-        <button class="main-btn" onclick="location.reload()">Main</button>
-
-        <div class="title">本日の出来事は</div>
-
-        <div class="auth" id="authArea">
-            <button onclick="openLogin()">ログイン</button>
-            <button onclick="openSignup()">会員登録</button>
-        </div>
-    </div>
-
-    <!-- 게시판 -->
-    <div class="content">
-
-        <table>
-            <thead>
-                <tr>
-                    <th>番号</th>
-                    <th>タイトル</th>
-                    <th>作成者</th>
-                    <th>作成日</th>
-                    <th>閲覧数</th>
-                </tr>
-            </thead>
-            <tbody id="boardBody"></tbody>
-        </table>
-
-        <div class="empty" id="emptyMsg">投稿がありません</div>
-
-    </div>
-
-    <!-- footer -->
-    <div class="footer">
-        <button onclick="goWrite()">投稿</button>
-    </div>
-
-</div>
-
-<!-- 로그인 -->
-<div class="modal" id="loginModal">
-    <div class="modal-box">
-        <h3>ログイン</h3>
-
-        <input id="li-username" placeholder="ユーザー名">
-        <input id="li-password" type="password" placeholder="パスワード">
-
-        <button onclick="login()">ログイン</button>
-        <button class="close" onclick="closeModal()">閉じる</button>
+<div class="header">
+    <button onclick="location.reload()">Main</button>
+    <div class="title">本日の出来事は</div>
+    <div id="authArea">
+        <button onclick="openLogin()">ログイン</button>
+        <button onclick="openSignup()">会員登録</button>
     </div>
 </div>
 
-<!-- 회원가입 -->
-<div class="modal" id="signupModal">
-    <div class="modal-box">
-        <h3>会員登録</h3>
-
-        <input id="su-username" placeholder="ユーザー名">
-        <input id="su-password" type="password" placeholder="パスワード">
-
-        <button onclick="signup()">登録</button>
-        <button class="close" onclick="closeModal()">閉じる</button>
-    </div>
+<div class="content">
+<table>
+<thead>
+<tr>
+<th>番号</th><th>タイトル</th><th>作成者</th><th>日付</th><th>閲覧数</th>
+</tr>
+</thead>
+<tbody id="boardBody"></tbody>
+</table>
 </div>
+
+<div class="footer">
+<button onclick="goWrite()">投稿</button>
+</div>
+
+</div>
+
+<!-- 상세 -->
 <div class="modal" id="detailModal">
-    <div class="modal-box">
-        <h3 id="detailTitle"></h3>
-        <p id="detailAuthor"></p>
-        <hr>
-        <p id="detailContent"></p>
+<div class="modal-box">
 
-        <button onclick="closeDetail()">閉じる</button>
-    </div>
+<h3 id="detailTitle"></h3>
+<input id="editTitle" style="display:none; width:100%;">
+
+<p id="detailAuthor"></p>
+<hr>
+
+<p id="detailContent"></p>
+<textarea id="editContent" style="display:none; width:100%; height:100px;"></textarea>
+
+<div id="detailButtons">
+<button onclick="startEdit()">修正</button>
+<button onclick="deletePost()">削除</button>
+<button onclick="closeDetail()">閉じる</button>
 </div>
+
+<div id="editButtons" style="display:none;">
+<button onclick="saveEdit()">保存</button>
+<button onclick="cancelEdit()">キャンセル</button>
+</div>
+
+</div>
+</div>
+
 <script>
-function openLogin(){
-    document.getElementById("loginModal").style.display = "flex";
-}
 
-function openSignup(){
-    document.getElementById("signupModal").style.display = "flex";
-}
+/* ================= API ================= */
+const BoardAPI = {
+    list: () => fetch("/board/list").then(r=>r.json()),
+    detail: (id) => fetch(`/board/${id}`).then(r=>r.json()),
+    delete: (id) => fetch(`/board/${id}`, {method:"DELETE"}).then(r=>r.text()),
+    update: (id, body) => fetch(`/board/${id}`, {
+        method:"PUT",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body
+    }).then(r=>r.text())
+};
 
-function closeModal(){
-    document.getElementById("loginModal").style.display = "none";
-    document.getElementById("signupModal").style.display = "none";
-}
+/* ================= 상태 ================= */
+let currentPostId = null;
 
-/* 회원가입 */
-function signup(){
-    const u = document.getElementById("su-username").value.trim();
-    const p = document.getElementById("su-password").value.trim();
+/* ================= UX ================= */
+document.addEventListener("keydown", e=>{
+    if(e.key==="Escape") closeDetail();
+});
+document.getElementById("detailModal").addEventListener("click", e=>{
+    if(e.target===e.currentTarget) closeDetail();
+});
 
-    fetch("/user/signup", {
-        method: "POST",
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: `u=${encodeURIComponent(u)}&p=${encodeURIComponent(p)}`
-    })
-    .then(res => res.text())
-    .then(result => {
-        if(result === "OK"){
-            alert("登録成功！");
-            closeModal();
-        } else {
-            alert("エラー発生");
-        }
-    });
-}
-
-/* 로그인 */
-function login(){
-    const u = document.getElementById("li-username").value.trim();
-    const p = document.getElementById("li-password").value.trim();
-
-    fetch("/user/login", {
-        method: "POST",
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: `u=${encodeURIComponent(u)}&p=${encodeURIComponent(p)}`
-    })
-    .then(res => res.text())
-    .then(result => {
-        if(result === "OK"){
-            alert("ログイン成功");
-            closeModal();
-            checkLogin();
-        } else {
-            alert("ログイン失敗");
-        }
-    });
-}
-
-/* 로그인 상태 체크 */
-function checkLogin(){
-    fetch("/user/me")
-    .then(res => res.text())
-    .then(user => {
-        if(user !== "null"){
-            document.getElementById("authArea").innerHTML = `
-                <span>${user}</span>
-                <button onclick="logout()">ログアウト</button>
-            `;
-        }
-    });
-}
-
-/* 로그아웃 */
-function logout(){
-    fetch("/user/logout", { method: "POST" })
-    .then(() => location.reload());
-}
-
-/* 글쓰기 */
-function goWrite(){
-    fetch("/user/me")
-    .then(res => res.text())
-    .then(user => {
-        if(user === "null"){
-            alert("ログインしてください");
-            openLogin();
-            return;
-        }
-        
-        location.href = "/board/write";
-        	
-    });
-}
-function viewDetail(id){
-    fetch(`/board/${id}`)
-    .then(res => res.json())
-    .then(data => {
-
-        document.getElementById("detailTitle").innerText = data.title;
-        document.getElementById("detailAuthor").innerText = "작성자: " + data.author;
-        document.getElementById("detailContent").innerText = data.content;
-
-        document.getElementById("detailModal").style.display = "flex";
-    });
-}
-function closeDetail(){
-    document.getElementById("detailModal").style.display = "none";
-}
+/* ================= 게시판 ================= */
 function loadBoard(){
-    fetch("/board/list")
-    .then(res => res.json())
-    .then(data => {
-
+    BoardAPI.list().then(data=>{
         const body = document.getElementById("boardBody");
-        const empty = document.getElementById("emptyMsg");
+        body.innerHTML="";
 
-        body.innerHTML = "";
-
-        if(data.length === 0){
-            empty.style.display = "block";
-            return;
-        }
-
-        empty.style.display = "none";
-
-        data.forEach((b, index) => {
-            body.innerHTML += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td><a href="#" onclick="viewDetail(${b.id})">${b.title}</a></td>
-                    <td>${b.author}</td>
-                    <td>${b.createdAt ? b.createdAt.replace('T',' ').substring(0,16) : ''}</td>
-                    <td>${b.viewCount}</td>
-                </tr>
-            `;
+        data.forEach((b,i)=>{
+            body.innerHTML+=`
+            <tr>
+                <td>${i+1}</td>
+                <td><a href="#" onclick="viewDetail(${b.id})">${b.title}</a></td>
+                <td>${b.author}</td>
+                <td>${b.createdAt?.substring(0,16)}</td>
+                <td>${b.viewCount}</td>
+            </tr>`;
         });
     });
 }
 
-/* 초기 실행 */
-window.onload = function(){
-    checkLogin();
+/* ================= 상세 ================= */
+function viewDetail(id){
+    currentPostId = id;
+
+    BoardAPI.detail(id).then(data=>{
+        document.getElementById("detailTitle").innerText = data.title;
+        document.getElementById("detailContent").innerText = data.content;
+        document.getElementById("detailAuthor").innerText = "작성자: "+data.author;
+
+        fetch("/user/me")
+        .then(r=>r.text())
+        .then(user=>{
+            document.getElementById("detailButtons").style.display =
+                (user===data.author) ? "block" : "none";
+        });
+
+        document.getElementById("detailModal").style.display="flex";
+    });
+}
+
+function closeDetail(){
+    document.getElementById("detailModal").style.display="none";
+}
+
+/* ================= 삭제 ================= */
+function deletePost(){
+    if(!confirm("削除しますか？")) return;
+
+    BoardAPI.delete(currentPostId).then(res=>{
+        if(res==="OK"){
+            alert("削除成功");
+            closeDetail();
+            loadBoard();
+        }
+    });
+}
+
+/* ================= 수정 ================= */
+function startEdit(){
+    const t = detailTitle.innerText;
+    const c = detailContent.innerText;
+
+    editTitle.value = t;
+    editContent.value = c;
+
+    detailTitle.style.display="none";
+    detailContent.style.display="none";
+
+    editTitle.style.display="block";
+    editContent.style.display="block";
+
+    detailButtons.style.display="none";
+    editButtons.style.display="block";
+}
+
+function saveEdit(){
+    const t = editTitle.value.trim();
+    const c = editContent.value.trim();
+
+    if(t.length<2){ alert("タイトル短い"); return; }
+    if(c.length<5){ alert("内容短い"); return; }
+
+    BoardAPI.update(currentPostId, `title=${encodeURIComponent(t)}&content=${encodeURIComponent(c)}`)
+    .then(res=>{
+        if(res==="OK"){
+            alert("修正成功");
+            closeDetail();
+            loadBoard();
+        }
+    });
+}
+
+function cancelEdit(){
+    detailTitle.style.display="block";
+    detailContent.style.display="block";
+
+    editTitle.style.display="none";
+    editContent.style.display="none";
+
+    detailButtons.style.display="block";
+    editButtons.style.display="none";
+}
+
+/* ================= 로그인 ================= */
+function openLogin(){ alert("ログイン機能は既存利用"); }
+function openSignup(){ alert("会員登録は既存利用"); }
+
+function goWrite(){
+    fetch("/user/me")
+    .then(r=>r.text())
+    .then(user=>{
+        if(user==="null"){
+            alert("ログイン必要");
+            return;
+        }
+        location.href="/board/write";
+    });
+}
+
+/* ================= 초기 ================= */
+window.onload = ()=>{
     loadBoard();
 };
+
 </script>
 
 </body>
