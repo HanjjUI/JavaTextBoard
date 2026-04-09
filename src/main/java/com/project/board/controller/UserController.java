@@ -17,7 +17,6 @@ public class UserController {
 
     private final UserService service;
 
-    // 생성자 주입 (실무 표준)
     public UserController(UserService service){
         this.service = service;
     }
@@ -28,7 +27,7 @@ public class UserController {
      * @param p password
      */
     @PostMapping("/signup")
-    public String signup(String u, String p){
+    public String signup(@RequestParam String u, @RequestParam String p){
 
         System.out.println("[SIGNUP] username = " + u);
 
