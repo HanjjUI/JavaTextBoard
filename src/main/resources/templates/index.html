@@ -233,9 +233,10 @@ function closeModal(){
     document.getElementById("signupModal").style.display="none";
 }
 
+/* ✅ 수정 완료 */
 function signup(){
-    const u = su-username.value.trim();
-    const p = su-password.value.trim();
+    const u = document.getElementById("su-username").value.trim();
+    const p = document.getElementById("su-password").value.trim();
 
     fetch("/user/signup", {
         method:"POST",
@@ -247,13 +248,17 @@ function signup(){
         if(res==="OK"){
             alert("登録成功");
             closeModal();
+        } else {
+            alert("登録失敗");
         }
-    });
+    })
+    .catch(()=>alert("通信エラー"));
 }
 
+/* ✅ 수정 완료 */
 function login(){
-    const u = li-username.value.trim();
-    const p = li-password.value.trim();
+    const u = document.getElementById("li-username").value.trim();
+    const p = document.getElementById("li-password").value.trim();
 
     fetch("/user/login", {
         method:"POST",
@@ -266,8 +271,11 @@ function login(){
             alert("ログイン成功");
             closeModal();
             checkLogin();
+        } else {
+            alert("ログイン失敗");
         }
-    });
+    })
+    .catch(()=>alert("通信エラー"));
 }
 
 function checkLogin(){
@@ -275,7 +283,7 @@ function checkLogin(){
     .then(r=>r.text())
     .then(user=>{
         if(user!=="null"){
-            authArea.innerHTML = `
+            document.getElementById("authArea").innerHTML = `
                 <span>${user}</span>
                 <button onclick="logout()">ログアウト</button>
             `;
@@ -291,15 +299,17 @@ function logout(){
 /* ================= 게시판 ================= */
 function loadBoard(){
     BoardAPI.list().then(data=>{
-        const body = boardBody;
+        const body = document.getElementById("boardBody");
+        const empty = document.getElementById("emptyMsg");
+
         body.innerHTML="";
 
         if(data.length===0){
-            emptyMsg.style.display="block";
+            empty.style.display="block";
             return;
         }
 
-        emptyMsg.style.display="none";
+        empty.style.display="none";
 
         data.forEach((b,i)=>{
             body.innerHTML+=`
@@ -319,25 +329,26 @@ function viewDetail(id){
     currentPostId=id;
 
     BoardAPI.detail(id).then(data=>{
-        detailTitle.innerText=data.title;
-        detailContent.innerText=data.content;
-        detailAuthor.innerText="작성자: "+data.author;
+        document.getElementById("detailTitle").innerText=data.title;
+        document.getElementById("detailContent").innerText=data.content;
+        document.getElementById("detailAuthor").innerText="작성자: "+data.author;
 
         fetch("/user/me")
         .then(r=>r.text())
         .then(user=>{
-            detailButtons.style.display = (user===data.author) ? "block" : "none";
+            document.getElementById("detailButtons").style.display =
+                (user===data.author) ? "block" : "none";
         });
 
-        detailModal.style.display="flex";
+        document.getElementById("detailModal").style.display="flex";
     });
 }
 
 function closeDetail(){
-    detailModal.style.display="none";
+    document.getElementById("detailModal").style.display="none";
 }
 
-/* ================= 삭제 ================= */
+/* 삭제 */
 function deletePost(){
     if(!confirm("削除しますか？")) return;
 
@@ -350,24 +361,27 @@ function deletePost(){
     });
 }
 
-/* ================= 수정 ================= */
+/* 수정 */
 function startEdit(){
-    editTitle.value=detailTitle.innerText;
-    editContent.value=detailContent.innerText;
+    document.getElementById("editTitle").value =
+        document.getElementById("detailTitle").innerText;
 
-    detailTitle.style.display="none";
-    detailContent.style.display="none";
+    document.getElementById("editContent").value =
+        document.getElementById("detailContent").innerText;
 
-    editTitle.style.display="block";
-    editContent.style.display="block";
+    document.getElementById("detailTitle").style.display="none";
+    document.getElementById("detailContent").style.display="none";
 
-    detailButtons.style.display="none";
-    editButtons.style.display="block";
+    document.getElementById("editTitle").style.display="block";
+    document.getElementById("editContent").style.display="block";
+
+    document.getElementById("detailButtons").style.display="none";
+    document.getElementById("editButtons").style.display="block";
 }
 
 function saveEdit(){
-    const t=editTitle.value.trim();
-    const c=editContent.value.trim();
+    const t=document.getElementById("editTitle").value.trim();
+    const c=document.getElementById("editContent").value.trim();
 
     if(t.length<2){ alert("タイトル短い"); return; }
     if(c.length<5){ alert("内容短い"); return; }
@@ -385,26 +399,17 @@ function saveEdit(){
 }
 
 function cancelEdit(){
-    detailTitle.style.display="block";
-    detailContent.style.display="block";
+    document.getElementById("detailTitle").style.display="block";
+    document.getElementById("detailContent").style.display="block";
 
-    editTitle.style.display="none";
-    editContent.style.display="none";
+    document.getElementById("editTitle").style.display="none";
+    document.getElementById("editContent").style.display="none";
 
-    detailButtons.style.display="block";
-    editButtons.style.display="none";
+    document.getElementById("detailButtons").style.display="block";
+    document.getElementById("editButtons").style.display="none";
 }
 
-/* ================= UX ================= */
-document.addEventListener("keydown", e=>{
-    if(e.key==="Escape") closeDetail();
-});
-
-detailModal.addEventListener("click", e=>{
-    if(e.target===detailModal) closeDetail();
-});
-
-/* ================= 기타 ================= */
+/* 기타 */
 function goWrite(){
     fetch("/user/me")
     .then(r=>r.text())
@@ -418,7 +423,7 @@ function goWrite(){
     });
 }
 
-/* ================= 초기 ================= */
+/* 초기 */
 window.onload = ()=>{
     checkLogin();
     loadBoard();
