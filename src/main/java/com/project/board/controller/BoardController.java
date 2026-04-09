@@ -28,6 +28,7 @@ public class BoardController {
         if(user == null){
             return "LOGIN_REQUIRED";
         }
+        System.out.println("title=" + dto.getTitle()); // 🔥 확인용
 
         service.save(dto, user);
 
