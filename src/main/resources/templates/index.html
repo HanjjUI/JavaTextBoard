@@ -65,10 +65,48 @@ button:hover {
     display: flex;
     gap: 10px;
     height: 100%;
+    align-items: center;
 }
 
 /* content */
-.content { flex: 1; }
+.content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #eee;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.empty {
+    text-align: center;
+    margin-top: 50px;
+    color: #888;
+}
+
+/* footer */
+.footer {
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    text-align: right;
+}
 
 /* modal */
 .modal {
@@ -108,15 +146,41 @@ button:hover {
 
 <div class="container">
 
+    <!-- header -->
     <div class="header">
-        <button class="main-btn">Main</button>
+        <button class="main-btn" onclick="location.reload()">Main</button>
 
         <div class="title">本日の出来事は</div>
 
-        <div class="auth">
+        <div class="auth" id="authArea">
             <button onclick="openLogin()">ログイン</button>
             <button onclick="openSignup()">会員登録</button>
         </div>
+    </div>
+
+    <!-- 게시판 -->
+    <div class="content">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>番号</th>
+                    <th>タイトル</th>
+                    <th>作成者</th>
+                    <th>作成日</th>
+                    <th>閲覧数</th>
+                </tr>
+            </thead>
+            <tbody id="boardBody"></tbody>
+        </table>
+
+        <div class="empty" id="emptyMsg">投稿がありません</div>
+
+    </div>
+
+    <!-- footer -->
+    <div class="footer">
+        <button onclick="goWrite()">投稿</button>
     </div>
 
 </div>
@@ -161,21 +225,14 @@ function closeModal(){
     document.getElementById("signupModal").style.display = "none";
 }
 
-/* ✅ 회원가입 */
+/* 회원가입 */
 function signup(){
     const u = document.getElementById("su-username").value.trim();
     const p = document.getElementById("su-password").value.trim();
 
-    if(!u || !p){
-        alert("入力してください");
-        return;
-    }
-
     fetch("/user/signup", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: `u=${encodeURIComponent(u)}&p=${encodeURIComponent(p)}`
     })
     .then(res => res.text())
@@ -183,24 +240,20 @@ function signup(){
         if(result === "OK"){
             alert("登録成功！");
             closeModal();
-        } else if(result === "DUPLICATE"){
-            alert("すでに存在するユーザーです");
         } else {
             alert("エラー発生");
         }
     });
 }
 
-/* ✅ 로그인 */
+/* 로그인 */
 function login(){
     const u = document.getElementById("li-username").value.trim();
     const p = document.getElementById("li-password").value.trim();
 
     fetch("/user/login", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: `u=${encodeURIComponent(u)}&p=${encodeURIComponent(p)}`
     })
     .then(res => res.text())
@@ -208,11 +261,51 @@ function login(){
         if(result === "OK"){
             alert("ログイン成功");
             closeModal();
+            checkLogin();
         } else {
             alert("ログイン失敗");
         }
     });
 }
+
+/* 로그인 상태 체크 */
+function checkLogin(){
+    fetch("/user/me")
+    .then(res => res.text())
+    .then(user => {
+        if(user !== "null"){
+            document.getElementById("authArea").innerHTML = `
+                <span>${user}</span>
+                <button onclick="logout()">ログアウト</button>
+            `;
+        }
+    });
+}
+
+/* 로그아웃 */
+function logout(){
+    fetch("/user/logout", { method: "POST" })
+    .then(() => location.reload());
+}
+
+/* 글쓰기 */
+function goWrite(){
+    fetch("/user/me")
+    .then(res => res.text())
+    .then(user => {
+        if(user === "null"){
+            alert("ログインしてください");
+            openLogin();
+        } else {
+            alert("投稿ページへ 이동 (구현 필요)");
+        }
+    });
+}
+
+/* 초기 실행 */
+window.onload = function(){
+    checkLogin();
+};
 </script>
 
 </body>
