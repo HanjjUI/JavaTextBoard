@@ -27,7 +27,7 @@ public class UserController {
      * @param p password
      */
     @PostMapping("/signup")
-    public String signup(@RequestParam String u, @RequestParam gString p){
+    public String signup(@RequestParam String u, @RequestParam String p){
 
         System.out.println("[SIGNUP] username = " + u + ", p=" + p);
 
