@@ -21,20 +21,13 @@ public class BoardController {
 
     // 投稿作成
     @PostMapping("/write")
-    public String write(String title, String content, HttpSession session){
+    public String write(@RequestBody BoardDto dto, HttpSession session){
 
         String user = (String)session.getAttribute("loginUser");
 
-        // ログインチェック
         if(user == null){
             return "LOGIN_REQUIRED";
         }
-
-        // DTO 생성
-        BoardDto dto = BoardDto.builder()
-                .title(title)
-                .content(content)
-                .build();
 
         service.save(dto, user);
 
