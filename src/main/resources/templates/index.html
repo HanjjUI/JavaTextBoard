@@ -11,43 +11,30 @@ body {
     margin: 0;
 }
 
-button {
-    cursor: pointer;
-    border: none;
-    background: #333;
-    color: white;
-    transition: 0.2s;
-    padding: 8px 12px;
-    border-radius: 5px;
-}
-
-button:hover {
-    background: #555;
-}
-
+/* 전체 */
 .container {
-    width: 900px;
+    width: 800px;
     height: 900px;
     margin: 40px auto;
     background: white;
-    border-radius: 10px;
+    border: 2px solid black;
     display: flex;
     flex-direction: column;
 }
 
-/* header */
+/* ===== 상단 ===== */
 .header {
     display: flex;
     align-items: center;
     padding: 10px;
-    height: 60px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 2px solid black;
 }
 
 .title {
     flex: 1;
     text-align: center;
-    font-weight: bold;
+    border: 1px solid black;
+    padding: 5px;
 }
 
 .auth {
@@ -55,42 +42,87 @@ button:hover {
     gap: 10px;
 }
 
-/* content */
+/* ===== 검색 ===== */
+.search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 2px solid black;
+}
+
+.search input {
+    width: 100px;
+    padding: 5px;
+}
+
+.search .title-input {
+    width: 250px;
+}
+
+/* ===== 게시판 ===== */
 .content {
     flex: 1;
-    padding: 20px;
     overflow-y: auto;
 }
 
-/* table */
 table {
     width: 100%;
     border-collapse: collapse;
 }
 
 th, td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
+    border: 1px solid black;
+    padding: 8px;
     text-align: center;
 }
 
-/* modal */
-.modal {
-    position: fixed;
-    top:0; left:0;
-    width:100%;
-    height:100%;
-    background: rgba(0,0,0,0.5);
-    display:none;
-    justify-content:center;
-    align-items:center;
+.empty {
+    text-align: center;
+    margin-top: 200px;
 }
 
-.modal-box {
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    width:350px;
+/* ===== 하단 ===== */
+.footer {
+    border-top: 2px solid black;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.pagination {
+    display: flex;
+    gap: 10px;
+}
+
+/* ===== 모달 ===== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0,0,0,0.5);
+
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+}
+
+.modal-content input {
+    width: 90%;
+    margin: 10px;
+    padding: 8px;
 }
 </style>
 </head>
@@ -99,168 +131,232 @@ th, td {
 
 <div class="container">
 
-<div class="header">
-    <button onclick="location.reload()">Main</button>
-    <div class="title">本日の出来事は</div>
-    <div class="auth" id="authArea"></div>
-</div>
+    <!-- 상단 -->
+    <div class="header">
 
-<div class="content">
-    <table>
-        <thead>
-        <tr>
-            <th>番号</th>
-            <th>タイトル</th>
-            <th>作成者</th>
-            <th>作成日</th>
-            <th>閲覧数</th>
-        </tr>
-        </thead>
-        <tbody id="boardBody"></tbody>
-    </table>
-</div>
+        <button onclick="location.href='/'">Main</button>
 
-<div style="padding:10px; text-align:right;">
-    <button onclick="goWrite()">投稿</button>
-</div>
+        <div class="title">掲示板タイトル</div>
 
-</div>
+        <div class="auth">
 
-<!-- 상세 모달 -->
-<div class="modal" id="detailModal">
-    <div class="modal-box">
+            <!-- 로그인 상태 -->
+            <span id="userDisplay"></span>
 
-        <h3 id="detailTitle"></h3>
-        <p id="detailAuthor"></p>
-        <hr>
-        <p id="detailContent"></p>
+            <button id="loginBtn" onclick="openLogin()">ログイン</button>
+            <button onclick="openSignup()">会員登録</button>
 
-        <!-- 🔥 핵심: 수정/삭제 -->
-        <div id="detailActions" style="margin-top:15px; display:none;">
-            <button onclick="editPost()">修正</button>
-            <button onclick="deletePost()" style="background:crimson;">削除</button>
         </div>
 
-        <br>
-        <button onclick="closeDetail()">閉じる</button>
+    </div>
+
+    <!-- 검색 -->
+    <div class="search">
+        <input placeholder="番号">
+        <input class="title-input" placeholder="タイトル">
+        <input placeholder="作成者">
+        <button>検索</button>
+    </div>
+
+    <!-- 게시판 -->
+    <div class="content">
+        <table>
+            <thead>
+                <tr>
+                    <th>番号</th>
+                    <th>タイトル</th>
+                    <th>作成者</th>
+                    <th>作成日</th>
+                    <th>閲覧数</th>
+                </tr>
+            </thead>
+            <tbody id="boardBody"></tbody>
+        </table>
+
+        <div class="empty">投稿がありません</div>
+    </div>
+
+    <!-- 하단 -->
+    <div class="footer">
+        <div class="pagination">
+            <button>前へ</button>
+            <button>次へ</button>
+        </div>
+
+        <button onclick="goWrite()">投稿</button>
+    </div>
+
+</div>
+
+<!-- 🔥 로그인 모달 -->
+<div id="loginModal" class="modal">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2>ログイン</h2>
+        <input id="lu" placeholder="ユーザー名"><br>
+        <input id="lp" type="password" placeholder="パスワード"><br>
+
+        <button onclick="login()">ログイン</button>
+        <button onclick="closeLogin()">閉じる</button>
+
+        <p id="lmsg"></p>
+    </div>
+</div>
+
+<!-- 🔥 회원가입 모달 -->
+<div id="signupModal" class="modal">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2>会員登録</h2>
+        <input id="su" placeholder="ユーザー名"><br>
+        <input id="sp" type="password" placeholder="パスワード"><br>
+
+        <button onclick="signup()">登録</button>
+        <button onclick="closeSignup()">閉じる</button>
+
+        <p id="smsg"></p>
     </div>
 </div>
 
 <script>
-let currentUser = null;
-let currentPostId = null;
-let currentPostAuthor = null;
 
-/* 로그인 상태 */
+// =======================
+// 로그인 상태 체크
+// =======================
+window.onload = function(){
+    checkLogin();
+};
+
 function checkLogin(){
     fetch("/user/me")
     .then(res => res.text())
     .then(user => {
-        if(user !== "null"){
-            currentUser = user;
-            document.getElementById("authArea").innerHTML =
-                `<span>${user}</span>
-                 <button onclick="logout()">ログアウト</button>`;
-        } else {
-            document.getElementById("authArea").innerHTML =
-                `<button onclick="alert('ログイン必要')">ログイン</button>`;
+
+        if(user && user !== "null"){
+            document.getElementById("userDisplay").innerText = user + " さん";
+
+            document.getElementById("loginBtn").innerText = "ログアウト";
+            document.getElementById("loginBtn").onclick = logout;
         }
     });
 }
 
-/* 로그아웃 */
+// =======================
+// 로그인
+// =======================
+function openLogin(){
+    document.getElementById("loginModal").style.display = "flex";
+}
+
+function closeLogin(){
+    document.getElementById("loginModal").style.display = "none";
+}
+
+function login(){
+
+    const u = document.getElementById("lu").value.trim();
+    const p = document.getElementById("lp").value.trim();
+    const msg = document.getElementById("lmsg");
+
+    if(!u || !p){
+        msg.innerText = "入力してください";
+        return;
+    }
+
+    fetch("/user/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: `u=${encodeURIComponent(u)}&p=${encodeURIComponent(p)}`
+    })
+    .then(res => res.text())
+    .then(data => {
+        if(data === "OK"){
+            closeLogin();
+            checkLogin();
+        } else {
+            msg.innerText = "ログイン失敗";
+        }
+    });
+}
+
+// =======================
+// 로그아웃
+// =======================
 function logout(){
-    fetch("/user/logout",{method:"POST"})
+    fetch("/user/logout", {method:"POST"})
     .then(()=>location.reload());
 }
 
-/* 글쓰기 */
-function goWrite(){
-    if(!currentUser){
-        alert("ログインしてください");
+// =======================
+// 회원가입
+// =======================
+function openSignup(){
+    document.getElementById("signupModal").style.display = "flex";
+}
+
+function closeSignup(){
+    document.getElementById("signupModal").style.display = "none";
+}
+
+function signup(){
+
+    const u = document.getElementById("su").value.trim();
+    const p = document.getElementById("sp").value.trim();
+    const msg = document.getElementById("smsg");
+
+    if(!u || !p){
+        msg.innerText = "入力してください";
         return;
     }
-    location.href="/board/write";
-}
 
-/* 게시글 목록 */
-function loadBoard(){
-    fetch("/board/list")
-    .then(res=>res.json())
-    .then(data=>{
-        const body=document.getElementById("boardBody");
-        body.innerHTML="";
-
-        data.forEach((b,i)=>{
-            body.innerHTML+=`
-            <tr>
-                <td>${i+1}</td>
-                <td><a href="#" onclick="viewDetail(${b.id})">${b.title}</a></td>
-                <td>${b.author}</td>
-                <td>${b.createdAt ? b.createdAt.substring(0,16).replace('T',' ') : ''}</td>
-                <td>${b.viewCount}</td>
-            </tr>`;
-        });
-    });
-}
-
-/* 상세보기 */
-function viewDetail(id){
-    fetch(`/board/${id}`)
-    .then(res=>res.json())
-    .then(data=>{
-        currentPostId = data.id;
-        currentPostAuthor = data.author;
-
-        document.getElementById("detailTitle").innerText = data.title;
-        document.getElementById("detailAuthor").innerText = "작성자: "+data.author;
-        document.getElementById("detailContent").innerText = data.content;
-
-        // 🔥 권한 체크
-        if(currentUser === data.author){
-            document.getElementById("detailActions").style.display="block";
-        } else {
-            document.getElementById("detailActions").style.display="none";
-        }
-
-        document.getElementById("detailModal").style.display="flex";
-    });
-}
-
-/* 닫기 */
-function closeDetail(){
-    document.getElementById("detailModal").style.display="none";
-}
-
-/* 수정 */
-function editPost(){
-    location.href = `/board/edit/${currentPostId}`;
-}
-
-/* 삭제 */
-function deletePost(){
-    if(!confirm("本当に削除しますか？")) return;
-
-    fetch(`/board/delete/${currentPostId}`,{
-        method:"POST"
+    fetch("/user/signup", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: `u=${encodeURIComponent(u)}&p=${encodeURIComponent(p)}`
     })
-    .then(res=>res.text())
-    .then(result=>{
-        if(result==="OK"){
-            alert("削除完了");
-            closeDetail();
-            loadBoard();
-        }else{
-            alert("削除失敗");
+    .then(res => res.text())
+    .then(data => {
+        if(data === "OK"){
+            alert("登録完了");
+            closeSignup();
+        } else if(data === "DUPLICATE"){
+            msg.innerText = "既に存在するユーザー";
         }
     });
 }
 
-/* 초기 실행 */
-window.onload=function(){
-    checkLogin();
-    loadBoard();
+// =======================
+// 공통 UX
+// =======================
+
+// ESC 닫기
+document.addEventListener("keydown", e => {
+    if(e.key === "Escape"){
+        closeLogin();
+        closeSignup();
+    }
+});
+
+// 바깥 클릭 닫기
+window.onclick = function(e){
+    if(e.target.id === "loginModal") closeLogin();
+    if(e.target.id === "signupModal") closeSignup();
+};
+
+// =======================
+// 글쓰기
+// =======================
+function goWrite(){
+    fetch("/user/me")
+    .then(res => res.text())
+    .then(user => {
+        if(user === "null"){
+            alert("ログインしてください");
+            openLogin();
+        } else {
+            location.href = "/board/write";
+        }
+    });
 }
+
 </script>
 
 </body>
