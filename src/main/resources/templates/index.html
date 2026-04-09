@@ -210,7 +210,16 @@ tbody tr:hover {
         <button class="close" onclick="closeModal()">閉じる</button>
     </div>
 </div>
+<div class="modal" id="detailModal">
+    <div class="modal-box">
+        <h3 id="detailTitle"></h3>
+        <p id="detailAuthor"></p>
+        <hr>
+        <p id="detailContent"></p>
 
+        <button onclick="closeDetail()">閉じる</button>
+    </div>
+</div>
 <script>
 function openLogin(){
     document.getElementById("loginModal").style.display = "flex";
@@ -303,7 +312,21 @@ function goWrite(){
         	
     });
 }
+function viewDetail(id){
+    fetch(`/board/${id}`)
+    .then(res => res.json())
+    .then(data => {
 
+        document.getElementById("detailTitle").innerText = data.title;
+        document.getElementById("detailAuthor").innerText = "작성자: " + data.author;
+        document.getElementById("detailContent").innerText = data.content;
+
+        document.getElementById("detailModal").style.display = "flex";
+    });
+}
+function closeDetail(){
+    document.getElementById("detailModal").style.display = "none";
+}
 function loadBoard(){
     fetch("/board/list")
     .then(res => res.json())
@@ -325,7 +348,7 @@ function loadBoard(){
             body.innerHTML += `
                 <tr>
                     <td>${index + 1}</td>
-                    <td><a href="#">${b.title}</a></td>
+                    <td><a href="#" onclick="viewDetail(${b.id})">${b.title}</a></td>
                     <td>${b.author}</td>
                     <td>${b.createdAt ? b.createdAt.replace('T',' ').substring(0,16) : ''}</td>
                     <td>${b.viewCount}</td>

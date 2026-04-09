@@ -34,6 +34,10 @@ public class BoardController {
 
         return "OK";
     }
+    @GetMapping("/{id}")
+    public BoardDto detail(@PathVariable Long id){
+        return service.findById(id);
+    }
     
     // 投稿一覧取得
     @GetMapping("/list")
