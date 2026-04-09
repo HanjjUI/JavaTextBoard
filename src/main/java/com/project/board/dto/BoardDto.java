@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 
 // 掲示板DTO（画面に渡すデータ用）
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
