@@ -27,16 +27,16 @@ public class UserController {
      * @param p password
      */
     @PostMapping("/signup")
-    public String signup(@RequestParam String u, @RequestParam String p){
+    public String signup(@RequestParam String u, @RequestParam gString p){
 
-        System.out.println("[SIGNUP] username = " + u);
+        System.out.println("[SIGNUP] username = " + u + ", p=" + p);
 
         try {
             service.signup(u, p);
             return "OK";
-        } catch (Exception e){
-            System.out.println("[SIGNUP ERROR] " + e.getMessage());
-            return "DUPLICATE";
+        } catch (Exception e) {
+        	e.printStackTrace();
+        	return "ERROR";
         }
     }
 
