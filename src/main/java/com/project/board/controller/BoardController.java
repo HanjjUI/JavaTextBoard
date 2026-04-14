@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// 掲示板APIコントローラー
+// 掲示板に関するAPIコントローラーです
 @RestController
 @RequestMapping("/board")
 public class BoardController {
@@ -19,27 +19,32 @@ public class BoardController {
         this.service = service;
     }
 
-    // 投稿作成
+    // 投稿を作成するメソッドです
     @PostMapping("/write")
     public String write(@RequestBody BoardDto dto, HttpSession session){
 
         String user = (String)session.getAttribute("loginUser");
 
+        // ログインしていない場合は投稿できないようにしています
         if(user == null){
             return "LOGIN_REQUIRED";
         }
-        System.out.println("title=" + dto.getTitle()); // 🔥 확인용
+
+        // 入力確認用のログです
+        System.out.println("title=" + dto.getTitle());
 
         service.save(dto, user);
 
         return "OK";
     }
+
+    // 投稿詳細を取得するメソッドです
     @GetMapping("/{id}")
     public BoardDto detail(@PathVariable Long id){
         return service.findById(id);
     }
-    
-    // 投稿一覧取得
+
+    // 投稿一覧を取得するメソッドです
     @GetMapping("/list")
     public List<BoardDto> list(){
         return service.findAll(PageRequest.of(0, 10), "", "")

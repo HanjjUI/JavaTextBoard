@@ -51,14 +51,14 @@
 <a href="/login">ログインへ戻る</a>
 
 <script>
-// 会員登録処理
+// 会員登録をする関数です
 function signup(){
 
     const u = document.getElementById("u").value.trim();
     const p = document.getElementById("p").value.trim();
     const msg = document.getElementById("msg");
 
-    // 入力チェック
+    // 入力が空ではないか確認します
     if(!u || !p){
         msg.innerText = "ユーザー名とパスワードを入力してください";
         return;
@@ -74,6 +74,7 @@ function signup(){
     .then(res => res.text())
     .then(data => {
 
+        // 登録成功時はログイン画面へ移動します
         if(data === "OK"){
             alert("登録完了");
             location.href = "/login";
@@ -86,12 +87,14 @@ function signup(){
         }
     })
     .catch(() => {
+        // 通信に失敗した場合のメッセージです
         msg.innerText = "通信エラーが発生しました";
     });
 }
 
+// メイン画面に戻る関数です
 function goMain(){
-	location.href = "/";
+    location.href = "/";
 }
 </script>
 

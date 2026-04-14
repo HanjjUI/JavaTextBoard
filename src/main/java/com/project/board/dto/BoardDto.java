@@ -5,7 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-// 掲示板DTO（画面に渡すデータ用）
+// 掲示板のデータを画面側へ渡すためのDTOです
 @Getter
 @Setter
 @Builder
@@ -20,7 +20,7 @@ public class BoardDto {
     private LocalDateTime createdAt;
     private int viewCount;
 
-    // Entity → DTO変換メソッド
+    // EntityからDTOに変換するためのメソッドです
     public static BoardDto from(Board b){
         return BoardDto.builder()
                 .id(b.getId())

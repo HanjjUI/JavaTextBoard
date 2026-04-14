@@ -49,14 +49,17 @@
 <a href="/signup">新規登録</a>
 
 <script>
+// ログイン処理をする関数です
 function login(){
 
     var u = document.getElementById("u").value.trim();
     var p = document.getElementById("p").value.trim();
     var msg = document.getElementById("msg");
 
+    // 先にメッセージを空にします
     msg.innerText = "";
 
+    // 入力が空の場合はエラーメッセージを表示します
     if(!u || !p){
         msg.innerText = "ユーザー名とパスワードを入力してください";
         return;
@@ -71,12 +74,13 @@ function login(){
     })
     .then(function(res){
         if(!res.ok){
-        throw new Error();
+            throw new Error();
         }
         return res.text();
     })
     .then(function(data){
 
+        // ログイン成功時はメイン画面に移動します
         if(data === "OK"){
             alert("ログイン成功");
             location.href = "/";
@@ -85,12 +89,14 @@ function login(){
         }
     })
     .catch(function(){
+        // 通信に失敗した場合のメッセージです
         msg.innerText = "通信エラーが発生しました";
     });
 }
 
+// メイン画面に戻る関数です
 function goMain(){
-	location.href = "/";
+    location.href = "/";
 }
 
 </script>

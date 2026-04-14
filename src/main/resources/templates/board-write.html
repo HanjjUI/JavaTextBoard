@@ -22,7 +22,7 @@ body {
     flex-direction: column;
 }
 
-/* header */
+/* ヘッダー部分です */
 .header {
     display: flex;
     align-items: center;
@@ -42,14 +42,14 @@ body {
     font-weight: bold;
 }
 
-/* content */
+/* 入力エリアです */
 .content {
     flex: 1;
     padding: 30px;
     text-align: left;
 }
 
-/* form */
+/* 入力フォームのデザインです */
 input, textarea {
     width: 100%;
     padding: 10px;
@@ -61,7 +61,7 @@ textarea {
     height: 200px;
 }
 
-/* footer */
+/* 下のボタンエリアです */
 .footer {
     padding: 10px;
     border-top: 1px solid #ddd;
@@ -78,14 +78,14 @@ button {
 
 <div class="container">
 
-    <!-- header -->
+    <!-- ヘッダーです -->
     <div class="header">
         <button onclick="location.href='/'">Main</button>
         <div class="title">投稿作成</div>
         <div></div>
     </div>
 
-    <!-- content -->
+    <!-- 投稿入力エリアです -->
     <div class="content">
 
         <label>タイトル</label>
@@ -96,7 +96,7 @@ button {
 
     </div>
 
-    <!-- footer -->
+    <!-- 投稿ボタンのエリアです -->
     <div class="footer">
         <button onclick="submitPost()">投稿</button>
     </div>
@@ -104,6 +104,7 @@ button {
 </div>
 
 <script>
+// 投稿内容をサーバーに送る関数です
 function submitPost(){
 
     const title = document.getElementById("title").value;

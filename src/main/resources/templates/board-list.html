@@ -60,18 +60,20 @@
 </table>
 
 <script>
-// 게시글 목록 가져오기
+// 投稿一覧を取得します
 fetch("/board/list")
     .then(res => res.json())
     .then(data => {
 
         const list = document.getElementById("list");
 
+        // 投稿が1件もない場合の表示です
         if(data.length === 0){
             list.innerHTML = "<tr><td colspan='5'>投稿がありません</td></tr>";
             return;
         }
 
+        // 取得した投稿データを1件ずつ画面に表示します
         data.forEach(b => {
 
             list.innerHTML +=
@@ -85,6 +87,7 @@ fetch("/board/list")
         });
     })
     .catch(() => {
+        // データの取得に失敗した場合の表示です
         document.getElementById("list").innerHTML =
             "<tr><td colspan='5'>データ取得エラー</td></tr>";
     });

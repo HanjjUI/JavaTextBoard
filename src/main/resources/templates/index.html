@@ -122,7 +122,7 @@ input, textarea {
 
 </div>
 
-<!-- 로그인 -->
+<!-- ログイン用モーダルです -->
 <div class="modal" id="loginModal">
     <div class="modal-box">
         <h3>ログイン</h3>
@@ -132,7 +132,7 @@ input, textarea {
     </div>
 </div>
 
-<!-- 상세 -->
+<!-- 投稿詳細を表示するモーダルです -->
 <div class="modal" id="detailModal">
     <div class="modal-box">
         <h3 id="detailTitle"></h3>
@@ -143,9 +143,10 @@ input, textarea {
 
 <script>
 
-/* ================= 공통 ================= */
+/* ================= 共通処理 ================= */
 
-// XSS 방지
+// HTML文字をそのまま表示するための処理です
+// XSS対策として使っています
 function escapeHTML(str=""){
     return str.replace(/[&<>"']/g, m => ({
         "&":"&amp;","<":"&lt;",">":"&gt;",
@@ -153,7 +154,8 @@ function escapeHTML(str=""){
     })[m]);
 }
 
-// fetch 공통
+// fetch を共通化した関数です
+// 通信エラーが起きたときはアラートを表示します
 async function request(url, options={}){
     try{
         const res = await fetch(url, options);
@@ -165,11 +167,11 @@ async function request(url, options={}){
     }
 }
 
-/* ================= 상태 ================= */
+/* ================= 状態管理 ================= */
 let currentUser = null;
 let currentPostId = null;
 
-/* ================= API ================= */
+/* ================= API処理 ================= */
 const API = {
     async getUser(){
         const res = await request("/user/me");
@@ -201,9 +203,9 @@ const API = {
     }
 };
 
-/* ================= UI ================= */
+/* ================= 画面表示 ================= */
 
-// 로그인 상태 표시
+// ログイン状態に応じて右上の表示を切り替えます
 async function renderAuth(){
     currentUser = await API.getUser();
 
@@ -225,7 +227,7 @@ async function renderAuth(){
     }
 }
 
-// 게시판 렌더링
+// 掲示板一覧を画面に表示します
 async function renderBoard(){
     const data = await API.list();
     const body = document.getElementById("boardBody");
@@ -252,9 +254,9 @@ async function renderBoard(){
         });
 }
 
-/* ================= 기능 ================= */
+/* ================= 機能処理 ================= */
 
-// 로그인
+// ログイン処理です
 document.getElementById("loginBtn")
 .addEventListener("click", async ()=>{
     const u = document.getElementById("li-username").value;
@@ -270,13 +272,13 @@ document.getElementById("loginBtn")
     }
 });
 
-// 로그아웃
+// ログアウト処理です
 function logout(){
     fetch("/user/logout",{method:"POST"})
     .then(()=>location.reload());
 }
 
-// 상세보기
+// 投稿詳細を表示する処理です
 async function viewDetail(id){
     currentPostId = id;
 
@@ -288,7 +290,7 @@ async function viewDetail(id){
     openModal("detailModal");
 }
 
-// 삭제
+// 投稿削除処理です
 document.getElementById("deleteBtn")
 .addEventListener("click", async ()=>{
     if(!confirm("削除しますか？")) return;
@@ -301,7 +303,7 @@ document.getElementById("deleteBtn")
     }
 });
 
-// 글쓰기 이동
+// 投稿作成画面へ移動する処理です
 document.getElementById("writeBtn")
 .addEventListener("click", async ()=>{
     if(currentUser==="null"){
@@ -311,29 +313,33 @@ document.getElementById("writeBtn")
     location.href="/board/write";
 });
 
-/* ================= 모달 ================= */
+/* ================= モーダル処理 ================= */
 
+// モーダルを開く処理です
 function openModal(id){
     document.getElementById(id).style.display="flex";
 }
 
+// モーダルを閉じる処理です
 function closeModal(){
     document.querySelectorAll(".modal")
         .forEach(m=>m.style.display="none");
 }
 
-// 바깥 클릭 닫기
+// モーダルの外側をクリックしたら閉じます
 window.addEventListener("click", e=>{
     if(e.target.classList.contains("modal")){
         e.target.style.display="none";
     }
 });
 
-/* ================= 초기 ================= */
+/* ================= 初期処理 ================= */
 
+// Mainボタンを押すと画面を再読み込みします
 document.getElementById("mainBtn")
 .addEventListener("click", ()=>location.reload());
 
+// 画面が開いたときにログイン状態と投稿一覧を読み込みます
 window.onload = async ()=>{
     await renderAuth();
     await renderBoard();

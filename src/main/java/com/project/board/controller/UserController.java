@@ -6,10 +6,8 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * ユーザー関連APIコントローラー
- * - 認証（ログイン / ログアウト）
- * - セッション管理
- * - 会員登録
+ * ユーザー関連のAPIコントローラーです
+ * ログイン、ログアウト、会員登録などを担当します
  */
 @RestController
 @RequestMapping("/user")
@@ -22,9 +20,8 @@ public class UserController {
     }
 
     /**
-     * 会員登録
-     * @param u username
-     * @param p password
+     * 会員登録をするメソッドです
+     * u はユーザー名、p はパスワードです
      */
     @PostMapping("/signup")
     public String signup(@RequestParam String u, @RequestParam String p){
@@ -35,15 +32,14 @@ public class UserController {
             service.signup(u, p);
             return "OK";
         } catch (Exception e) {
-        	e.printStackTrace();
-        	return "ERROR";
+            e.printStackTrace();
+            return "ERROR";
         }
     }
 
     /**
-     * ログイン
-     * @param u username
-     * @param p password
+     * ログインをするメソッドです
+     * ログイン成功時はセッションにユーザー情報を保存します
      */
     @PostMapping("/login")
     public String login(String u, String p, HttpSession session){
@@ -53,7 +49,7 @@ public class UserController {
         User user = service.login(u, p);
 
         if(user != null){
-            // 🔥 세션 저장 (핵심)
+            // ログインしたユーザー名をセッションに保存します
             session.setAttribute("loginUser", user.getUsername());
 
             System.out.println("[LOGIN SUCCESS] " + u);
@@ -65,27 +61,29 @@ public class UserController {
     }
 
     /**
-     * ログアウト
+     * ログアウトをするメソッドです
+     * セッション情報を削除します
      */
     @PostMapping("/logout")
     public String logout(HttpSession session){
 
-        session.invalidate(); // 🔥 세션 완전 삭제
+        // セッションを無効にしてログアウト状態にします
+        session.invalidate();
 
         System.out.println("[LOGOUT]");
         return "OK";
     }
 
     /**
-     * ログイン状態確認
-     * 프론트에서 로그인 여부 체크용
+     * 現在ログインしているユーザーを確認するメソッドです
+     * フロント側でログイン状態を確認するときに使います
      */
     @GetMapping("/me")
     public String me(HttpSession session){
 
         String user = (String) session.getAttribute("loginUser");
 
-        // 🔥 중요: null 명확하게 반환
+        // ログインしていない場合は null を返します
         if(user == null){
             return "null";
         }
