@@ -60,6 +60,11 @@ th, td {
     text-align: center;
 }
 
+.title-link {
+    cursor: pointer;
+    color: #333;
+}
+
 .footer {
     padding: 10px;
     text-align: right;
@@ -67,26 +72,27 @@ th, td {
 
 .modal {
     position: fixed;
-    top:0; left:0;
-    width:100%;
-    height:100%;
-    background: rgba(0,0,0,0.5);
-    display:none;
-    justify-content:center;
-    align-items:center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
 }
 
 .modal-box {
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    width:320px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 320px;
 }
 
 input, textarea {
-    width:100%;
-    margin:10px 0;
-    padding:8px;
+    width: 100%;
+    margin: 10px 0;
+    padding: 8px;
 }
 </style>
 </head>
@@ -122,41 +128,36 @@ input, textarea {
 
 </div>
 
-<!-- ログイン用モーダルです -->
 <div class="modal" id="loginModal">
     <div class="modal-box">
         <h3>ログイン</h3>
         <input id="li-username" placeholder="ユーザー名">
-        <input id="li-password" type="password">
+        <input id="li-password" type="password" placeholder="パスワード">
         <button id="loginBtn">ログイン</button>
     </div>
 </div>
 
-<!-- 投稿詳細を表示するモーダルです -->
 <div class="modal" id="detailModal">
     <div class="modal-box">
         <h3 id="detailTitle"></h3>
         <p id="detailContent"></p>
+        <button id="editBtn">編集</button>
         <button id="deleteBtn">削除</button>
     </div>
 </div>
 
 <script>
-
-/* ================= 共通処理 ================= */
-
-// HTML文字をそのまま表示するための処理です
-// XSS対策として使っています
-function escapeHTML(str=""){
+function escapeHTML(str = ""){
     return str.replace(/[&<>"']/g, m => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",
-        '"':"&quot;","'":"&#39;"
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
     })[m]);
 }
 
-// fetch を共通化した関数です
-// 通信エラーが起きたときはアラートを表示します
-async function request(url, options={}){
+async function request(url, options = {}){
     try{
         const res = await fetch(url, options);
         if(!res.ok) throw new Error("Server Error");
@@ -167,22 +168,20 @@ async function request(url, options={}){
     }
 }
 
-/* ================= 状態管理 ================= */
 let currentUser = null;
 let currentPostId = null;
 
-/* ================= API処理 ================= */
 const API = {
     async getUser(){
         const res = await request("/user/me");
         return await res.text();
     },
 
-    async login(u,p){
-        const res = await request("/user/login",{
-            method:"POST",
-            headers:{"Content-Type":"application/x-www-form-urlencoded"},
-            body:`u=${encodeURIComponent(u)}&p=${encodeURIComponent(p)}`
+    async login(u, p){
+        const res = await request("/user/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body: `u=${encodeURIComponent(u)}&p=${encodeURIComponent(p)}`
         });
         return await res.text();
     },
@@ -198,14 +197,11 @@ const API = {
     },
 
     async delete(id){
-        const res = await request(`/board/${id}`,{method:"DELETE"});
+        const res = await request(`/board/${id}`, {method: "DELETE"});
         return await res.text();
     }
 };
 
-/* ================= 画面表示 ================= */
-
-// ログイン状態に応じて右上の表示を切り替えます
 async function renderAuth(){
     currentUser = await API.getUser();
 
@@ -223,23 +219,25 @@ async function renderAuth(){
             <button id="openLoginBtn">ログイン</button>
         `;
         document.getElementById("openLoginBtn")
-            .addEventListener("click", ()=>openModal("loginModal"));
+            .addEventListener("click", () => openModal("loginModal"));
     }
 }
 
-// 掲示板一覧を画面に表示します
 async function renderBoard(){
     const data = await API.list();
     const body = document.getElementById("boardBody");
 
-    const rows = data.map((b,i)=>`
+    if(data.length === 0){
+        body.innerHTML = "<tr><td colspan='5'>投稿がありません</td></tr>";
+        return;
+    }
+
+    const rows = data.map((b, i) => `
         <tr>
-            <td>${i+1}</td>
-            <td class="title-link" data-id="${b.id}">
-                ${escapeHTML(b.title)}
-            </td>
+            <td>${i + 1}</td>
+            <td class="title-link" data-id="${b.id}">${escapeHTML(b.title)}</td>
             <td>${escapeHTML(b.author)}</td>
-            <td>${b.createdAt?.substring(0,16)}</td>
+            <td>${b.createdAt ? b.createdAt.replace("T", " ").substring(0, 16) : ""}</td>
             <td>${b.viewCount}</td>
         </tr>
     `).join("");
@@ -247,38 +245,33 @@ async function renderBoard(){
     body.innerHTML = rows;
 
     document.querySelectorAll(".title-link")
-        .forEach(el=>{
-            el.addEventListener("click", e=>{
+        .forEach(el => {
+            el.addEventListener("click", e => {
                 viewDetail(e.target.dataset.id);
             });
         });
 }
 
-/* ================= 機能処理 ================= */
-
-// ログイン処理です
 document.getElementById("loginBtn")
-.addEventListener("click", async ()=>{
-    const u = document.getElementById("li-username").value;
-    const p = document.getElementById("li-password").value;
+    .addEventListener("click", async () => {
+        const u = document.getElementById("li-username").value;
+        const p = document.getElementById("li-password").value;
 
-    const res = await API.login(u,p);
+        const res = await API.login(u, p);
 
-    if(res==="OK"){
-        closeModal();
-        renderAuth();
-    }else{
-        alert("ログイン失敗");
-    }
-});
+        if(res === "OK"){
+            closeModal();
+            await renderAuth();
+        }else{
+            alert("ログイン失敗");
+        }
+    });
 
-// ログアウト処理です
 function logout(){
-    fetch("/user/logout",{method:"POST"})
-    .then(()=>location.reload());
+    fetch("/user/logout", {method: "POST"})
+        .then(() => location.reload());
 }
 
-// 投稿詳細を表示する処理です
 async function viewDetail(id){
     currentPostId = id;
 
@@ -287,64 +280,70 @@ async function viewDetail(id){
     document.getElementById("detailTitle").innerText = data.title;
     document.getElementById("detailContent").innerText = data.content;
 
+    const canManage = currentUser !== "null" && currentUser === data.author;
+    document.getElementById("editBtn").style.display = canManage ? "inline-block" : "none";
+    document.getElementById("deleteBtn").style.display = canManage ? "inline-block" : "none";
+
     openModal("detailModal");
 }
 
-// 投稿削除処理です
+document.getElementById("editBtn")
+    .addEventListener("click", () => {
+        location.href = `/board/write?id=${currentPostId}`;
+    });
+
 document.getElementById("deleteBtn")
-.addEventListener("click", async ()=>{
-    if(!confirm("削除しますか？")) return;
+    .addEventListener("click", async () => {
+        if(!confirm("削除しますか？")) return;
 
-    const res = await API.delete(currentPostId);
+        const res = await API.delete(currentPostId);
 
-    if(res==="OK"){
-        closeModal();
-        renderBoard();
-    }
-});
+        if(res === "OK"){
+            closeModal();
+            await renderBoard();
+            return;
+        }
 
-// 投稿作成画面へ移動する処理です
+        if(res === "LOGIN_REQUIRED"){
+            alert("ログインが必要です");
+            location.href = "/login";
+            return;
+        }
+
+        alert("削除に失敗しました");
+    });
+
 document.getElementById("writeBtn")
-.addEventListener("click", async ()=>{
-    if(currentUser==="null"){
-        openModal("loginModal");
-        return;
-    }
-    location.href="/board/write";
-});
+    .addEventListener("click", () => {
+        if(currentUser === "null"){
+            openModal("loginModal");
+            return;
+        }
+        location.href = "/board/write";
+    });
 
-/* ================= モーダル処理 ================= */
-
-// モーダルを開く処理です
 function openModal(id){
-    document.getElementById(id).style.display="flex";
+    document.getElementById(id).style.display = "flex";
 }
 
-// モーダルを閉じる処理です
 function closeModal(){
     document.querySelectorAll(".modal")
-        .forEach(m=>m.style.display="none");
+        .forEach(m => m.style.display = "none");
 }
 
-// モーダルの外側をクリックしたら閉じます
-window.addEventListener("click", e=>{
+window.addEventListener("click", e => {
     if(e.target.classList.contains("modal")){
-        e.target.style.display="none";
+        e.target.style.display = "none";
     }
 });
 
-/* ================= 初期処理 ================= */
-
-// Mainボタンを押すと画面を再読み込みします
 document.getElementById("mainBtn")
-.addEventListener("click", ()=>location.reload());
+    .addEventListener("click", () => location.reload());
 
-// 画面が開いたときにログイン状態と投稿一覧を読み込みます
-window.onload = async ()=>{
+window.onload = async () => {
     await renderAuth();
     await renderBoard();
 };
-
 </script>
 
 </body>

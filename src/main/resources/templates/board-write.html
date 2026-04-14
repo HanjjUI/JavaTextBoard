@@ -22,7 +22,6 @@ body {
     flex-direction: column;
 }
 
-/* ヘッダー部分です */
 .header {
     display: flex;
     align-items: center;
@@ -42,14 +41,12 @@ body {
     font-weight: bold;
 }
 
-/* 入力エリアです */
 .content {
     flex: 1;
     padding: 30px;
     text-align: left;
 }
 
-/* 入力フォームのデザインです */
 input, textarea {
     width: 100%;
     padding: 10px;
@@ -61,7 +58,6 @@ textarea {
     height: 200px;
 }
 
-/* 下のボタンエリアです */
 .footer {
     padding: 10px;
     border-top: 1px solid #ddd;
@@ -78,40 +74,56 @@ button {
 
 <div class="container">
 
-    <!-- ヘッダーです -->
     <div class="header">
         <button onclick="location.href='/'">Main</button>
-        <div class="title">投稿作成</div>
+        <div class="title" id="pageTitle">投稿作成</div>
         <div></div>
     </div>
 
-    <!-- 投稿入力エリアです -->
     <div class="content">
-
         <label>タイトル</label>
         <input id="title">
 
         <label>内容</label>
         <textarea id="content"></textarea>
-
     </div>
 
-    <!-- 投稿ボタンのエリアです -->
     <div class="footer">
-        <button onclick="submitPost()">投稿</button>
+        <button id="submitBtn" onclick="submitPost()">投稿</button>
     </div>
 
 </div>
 
 <script>
-// 投稿内容をサーバーに送る関数です
+const params = new URLSearchParams(location.search);
+const editId = params.get("id");
+
+if(editId){
+    document.getElementById("pageTitle").innerText = "投稿編集";
+    document.getElementById("submitBtn").innerText = "保存";
+
+    fetch(`/board/${editId}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("title").value = data.title || "";
+            document.getElementById("content").value = data.content || "";
+        })
+        .catch(() => {
+            alert("投稿データの取得に失敗しました");
+            location.href = "/index";
+        });
+}
+
 function submitPost(){
 
     const title = document.getElementById("title").value;
     const content = document.getElementById("content").value;
 
-    fetch("/board/write", {
-        method: "POST",
+    const method = editId ? "PUT" : "POST";
+    const url = editId ? `/board/${editId}` : "/board/write";
+
+    fetch(url, {
+        method: method,
         headers: {
             "Content-Type": "application/json"
         },
@@ -121,9 +133,23 @@ function submitPost(){
         })
     })
     .then(res => res.text())
-    .then(() => {
-        alert("投稿完了");
-        location.href = "/index";
+    .then(data => {
+        if(data === "OK"){
+            alert(editId ? "修正完了" : "投稿完了");
+            location.href = "/index";
+            return;
+        }
+
+        if(data === "LOGIN_REQUIRED"){
+            alert("ログインが必要です");
+            location.href = "/login";
+            return;
+        }
+
+        alert(editId ? "修正に失敗しました" : "投稿に失敗しました");
+    })
+    .catch(() => {
+        alert("通信エラーが発生しました");
     });
 }
 </script>
