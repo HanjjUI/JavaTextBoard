@@ -9,17 +9,33 @@
             font-family: Arial;
             text-align: center;
             margin-top: 60px;
+            background: #f5f5f5;
+        }
+
+        .signup-box {
+            width: 360px;
+            margin: 0 auto;
+            padding: 28px 24px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
         }
 
         input {
-            width: 250px;
-            margin: 10px;
-            padding: 8px;
+            width: 100%;
+            max-width: 280px;
+            margin: 10px auto;
+            padding: 10px 12px;
+            box-sizing: border-box;
+            display: block;
+            border: 1px solid #ccc;
+            border-radius: 6px;
         }
 
         button {
             padding: 8px 15px;
             cursor: pointer;
+            margin: 6px 4px 0;
         }
 
         #msg {
@@ -36,29 +52,29 @@
 
 <body>
 
-<h2>会員登録</h2>
+<div class="signup-box">
+    <h2>会員登録</h2>
 
-<input id="u" placeholder="ユーザー名"><br>
-<input id="p" type="password" placeholder="パスワード"><br>
+    <input id="u" placeholder="ユーザー名"><br>
+    <input id="p" type="password" placeholder="パスワード"><br>
 
-<div>
-<button onclick="signup()">登録</button>
-<button onclick="goMain()">メインに戻る</button>
+    <div>
+        <button onclick="signup()">登録</button>
+        <button onclick="goMain()">メインに戻る</button>
+    </div>
+
+    <p id="msg"></p>
+
+    <a href="/login">ログインへ戻る</a>
 </div>
 
-<p id="msg"></p>
-
-<a href="/login">ログインへ戻る</a>
-
 <script>
-// 会員登録をする関数です
 function signup(){
 
     const u = document.getElementById("u").value.trim();
     const p = document.getElementById("p").value.trim();
     const msg = document.getElementById("msg");
 
-    // 入力が空ではないか確認します
     if(!u || !p){
         msg.innerText = "ユーザー名とパスワードを入力してください";
         return;
@@ -74,7 +90,6 @@ function signup(){
     .then(res => res.text())
     .then(data => {
 
-        // 登録成功時はログイン画面へ移動します
         if(data === "OK"){
             alert("登録完了");
             location.href = "/login";
@@ -87,12 +102,10 @@ function signup(){
         }
     })
     .catch(() => {
-        // 通信に失敗した場合のメッセージです
         msg.innerText = "通信エラーが発生しました";
     });
 }
 
-// メイン画面に戻る関数です
 function goMain(){
     location.href = "/";
 }
