@@ -64,18 +64,20 @@ button:hover {
     display: flex;
     align-items: center;
     gap: 10px;
-    min-width: 140px;
+    min-width: 180px;
     justify-content: flex-end;
     font-size: 14px;
 }
 
 .content {
     flex: 1;
+    min-height: 0;
     padding: 10px 22px 24px;
     overflow: hidden;
 }
 
 .table-wrap {
+    min-height: 0;
     height: 100%;
     overflow-y: auto;
 }
@@ -379,7 +381,14 @@ async function renderAuth() {
 
         document.getElementById("logoutBtn").addEventListener("click", logout);
     } else {
-        area.innerHTML = "<button id='openLoginBtn'>ログイン</button>";
+        area.innerHTML =
+            "<button id='signupBtn'>新規登録</button>" +
+            "<button id='openLoginBtn'>ログイン</button>";
+
+        document.getElementById("signupBtn").addEventListener("click", function() {
+            location.href = "/signup";
+        });
+
         document.getElementById("openLoginBtn").addEventListener("click", function() {
             openModal("loginModal");
         });
