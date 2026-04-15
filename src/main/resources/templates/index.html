@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>掲示板アプリ</title>
+
 <style>
 body {
     font-family: "Segoe UI", Arial, sans-serif;
@@ -25,7 +32,6 @@ button:hover {
 .container {
     width: 900px;
     max-width: 94%;
-    min-height: auto;
     margin: 36px auto;
     background: white;
     border-radius: 16px;
@@ -134,6 +140,12 @@ th {
     word-break: break-word;
 }
 
+.modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
 input, textarea {
     width: 100%;
     margin: 10px 0;
@@ -142,10 +154,6 @@ input, textarea {
     border: 1px solid #d6d6d6;
     border-radius: 8px;
     font-size: 14px;
-}
-
-#editBtn {
-    margin-right: 8px;
 }
 
 @media (max-width: 768px) {
@@ -170,3 +178,268 @@ input, textarea {
     }
 }
 </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="header">
+        <button id="mainBtn">Main</button>
+        <div class="title">掲示板一覧</div>
+        <div id="authArea"></div>
+    </div>
+
+    <div class="content">
+        <table>
+            <thead>
+                <tr>
+                    <th>番号</th>
+                    <th>タイトル</th>
+                    <th>作成者</th>
+                    <th>日付</th>
+                    <th>閲覧数</th>
+                </tr>
+            </thead>
+            <tbody id="boardBody"></tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <button id="writeBtn">投稿</button>
+    </div>
+</div>
+
+<div class="modal" id="loginModal">
+    <div class="modal-box">
+        <h3>ログイン</h3>
+        <input id="li-username" placeholder="ユーザー名">
+        <input id="li-password" type="password" placeholder="パスワード">
+        <div class="modal-actions">
+            <button id="loginBtn">ログイン</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="detailModal">
+    <div class="modal-box">
+        <h3 id="detailTitle"></h3>
+        <p id="detailContent"></p>
+        <div class="modal-actions">
+            <button id="editBtn">編集</button>
+            <button id="deleteBtn">削除</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function escapeHTML(str) {
+    const value = str || "";
+    return value.replace(/[&<>"']/g, function(m) {
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        }[m];
+    });
+}
+
+async function request(url, options) {
+    try {
+        const res = await fetch(url, options || {});
+        if (!res.ok) {
+            throw new Error("Server Error");
+        }
+        return res;
+    } catch (e) {
+        alert("通信エラー");
+        throw e;
+    }
+}
+
+let currentUser = null;
+let currentPostId = null;
+
+const API = {
+    async getUser() {
+        const res = await request("/user/me");
+        return await res.text();
+    },
+
+    async login(u, p) {
+        const res = await request("/user/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: "u=" + encodeURIComponent(u) + "&p=" + encodeURIComponent(p)
+        });
+        return await res.text();
+    },
+
+    async list() {
+        const res = await request("/board/list");
+        return await res.json();
+    },
+
+    async detail(id) {
+        const res = await request("/board/" + id);
+        return await res.json();
+    },
+
+    async delete(id) {
+        const res = await request("/board/" + id, {
+            method: "DELETE"
+        });
+        return await res.text();
+    }
+};
+
+async function renderAuth() {
+    currentUser = await API.getUser();
+    const area = document.getElementById("authArea");
+
+    if (currentUser !== "null") {
+        area.innerHTML =
+            "<span>" + escapeHTML(currentUser) + "</span>" +
+            "<button id='logoutBtn'>ログアウト</button>";
+
+        document.getElementById("logoutBtn").addEventListener("click", logout);
+    } else {
+        area.innerHTML = "<button id='openLoginBtn'>ログイン</button>";
+        document.getElementById("openLoginBtn").addEventListener("click", function() {
+            openModal("loginModal");
+        });
+    }
+}
+
+async function renderBoard() {
+    const data = await API.list();
+    const body = document.getElementById("boardBody");
+
+    if (data.length === 0) {
+        body.innerHTML = "<tr><td colspan='5'>投稿がありません</td></tr>";
+        return;
+    }
+
+    const rows = data.map(function(b, i) {
+        const createdAt = b.createdAt ? b.createdAt.replace("T", " ").substring(0, 16) : "";
+        return (
+            "<tr>" +
+            "<td>" + (i + 1) + "</td>" +
+            "<td class='title-link' data-id='" + b.id + "'>" + escapeHTML(b.title) + "</td>" +
+            "<td>" + escapeHTML(b.author) + "</td>" +
+            "<td>" + createdAt + "</td>" +
+            "<td>" + b.viewCount + "</td>" +
+            "</tr>"
+        );
+    }).join("");
+
+    body.innerHTML = rows;
+
+    document.querySelectorAll(".title-link").forEach(function(el) {
+        el.addEventListener("click", function(e) {
+            viewDetail(e.target.dataset.id);
+        });
+    });
+}
+
+document.getElementById("loginBtn").addEventListener("click", async function() {
+    const u = document.getElementById("li-username").value;
+    const p = document.getElementById("li-password").value;
+
+    const res = await API.login(u, p);
+
+    if (res === "OK") {
+        closeModal();
+        await renderAuth();
+    } else {
+        alert("ログイン失敗");
+    }
+});
+
+function logout() {
+    fetch("/user/logout", { method: "POST" })
+        .then(function() {
+            location.reload();
+        });
+}
+
+async function viewDetail(id) {
+    currentPostId = id;
+
+    const data = await API.detail(id);
+
+    document.getElementById("detailTitle").innerText = data.title;
+    document.getElementById("detailContent").innerText = data.content;
+
+    const canManage = currentUser !== "null" && currentUser === data.author;
+    document.getElementById("editBtn").style.display = canManage ? "inline-block" : "none";
+    document.getElementById("deleteBtn").style.display = canManage ? "inline-block" : "none";
+
+    openModal("detailModal");
+}
+
+document.getElementById("editBtn").addEventListener("click", function() {
+    location.href = "/board/write?id=" + currentPostId;
+});
+
+document.getElementById("deleteBtn").addEventListener("click", async function() {
+    if (!confirm("削除しますか？")) {
+        return;
+    }
+
+    const res = await API.delete(currentPostId);
+
+    if (res === "OK") {
+        closeModal();
+        await renderBoard();
+        return;
+    }
+
+    if (res === "LOGIN_REQUIRED") {
+        alert("ログインが必要です");
+        location.href = "/login";
+        return;
+    }
+
+    alert("削除に失敗しました");
+});
+
+document.getElementById("writeBtn").addEventListener("click", function() {
+    if (currentUser === "null") {
+        openModal("loginModal");
+        return;
+    }
+    location.href = "/board/write";
+});
+
+function openModal(id) {
+    document.getElementById(id).style.display = "flex";
+}
+
+function closeModal() {
+    document.querySelectorAll(".modal").forEach(function(m) {
+        m.style.display = "none";
+    });
+}
+
+window.addEventListener("click", function(e) {
+    if (e.target.classList.contains("modal")) {
+        e.target.style.display = "none";
+    }
+});
+
+document.getElementById("mainBtn").addEventListener("click", function() {
+    location.reload();
+});
+
+window.onload = async function() {
+    await renderAuth();
+    await renderBoard();
+};
+</script>
+
+</body>
+</html>
