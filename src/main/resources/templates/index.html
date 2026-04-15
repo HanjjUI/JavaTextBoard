@@ -140,6 +140,47 @@ th {
     word-break: break-word;
 }
 
+.detail-meta {
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    background: #f8f8f8;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.detail-meta div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid #ececec;
+    padding: 4px 0;
+}
+
+.detail-meta div:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 700;
+    color: #444;
+}
+
+.detail-value {
+    color: #222;
+    text-align: right;
+    word-break: break-word;
+}
+
+.detail-content {
+    white-space: pre-wrap;
+    background: #fff;
+    border: 1px solid #ececec;
+    border-radius: 10px;
+    padding: 14px;
+    min-height: 80px;
+}
+
 .modal-actions {
     display: flex;
     gap: 8px;
@@ -223,7 +264,13 @@ input, textarea {
 <div class="modal" id="detailModal">
     <div class="modal-box">
         <h3 id="detailTitle"></h3>
-        <p id="detailContent"></p>
+        <div class="detail-meta">
+            <div><span class="detail-label">番号</span><span class="detail-value" id="detailId"></span></div>
+            <div><span class="detail-label">作成者</span><span class="detail-value" id="detailAuthor"></span></div>
+            <div><span class="detail-label">作成日時</span><span class="detail-value" id="detailCreatedAt"></span></div>
+            <div><span class="detail-label">閲覧数</span><span class="detail-value" id="detailViewCount"></span></div>
+        </div>
+        <div class="detail-content" id="detailContent"></div>
         <div class="modal-actions">
             <button id="editBtn">編集</button>
             <button id="deleteBtn">削除</button>
@@ -370,9 +417,14 @@ async function viewDetail(id) {
     currentPostId = id;
 
     const data = await API.detail(id);
+    const createdAt = data.createdAt ? data.createdAt.replace("T", " ").substring(0, 16) : "";
 
     document.getElementById("detailTitle").innerText = data.title;
     document.getElementById("detailContent").innerText = data.content;
+    document.getElementById("detailId").innerText = data.id;
+    document.getElementById("detailAuthor").innerText = data.author;
+    document.getElementById("detailCreatedAt").innerText = createdAt;
+    document.getElementById("detailViewCount").innerText = data.viewCount;
 
     const canManage = currentUser !== "null" && currentUser === data.author;
     document.getElementById("editBtn").style.display = canManage ? "inline-block" : "none";
