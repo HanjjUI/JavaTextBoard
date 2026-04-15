@@ -22,8 +22,6 @@ Spring Bootを使用して作成した掲示板アプリです。
 - 投稿一覧表示
 - 投稿詳細表示
 - 投稿編集 / 削除
-- 検索機能（タイトル・作成者）
-- ページネーション
 
 ## 画面一覧
 - メイン画面
@@ -34,7 +32,7 @@ Spring Bootを使用して作成した掲示板アプリです。
 - 投稿詳細画面
 
 ## デプロイURL
-[https://your-app.railway.app](https://your-app.railway.app)
+[https://javatextboard-production.up.railway.app](https://javatextboard-production.up.railway.app)
 
 ## 工夫した点
 - Controller、Service、Repository の役割を分けて実装しました

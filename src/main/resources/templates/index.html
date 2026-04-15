@@ -32,6 +32,9 @@ button:hover {
 .container {
     width: 900px;
     max-width: 94%;
+    height: 78vh;
+    min-height: 620px;
+    max-height: 780px;
     margin: 36px auto;
     background: white;
     border-radius: 16px;
@@ -67,7 +70,14 @@ button:hover {
 }
 
 .content {
+    flex: 1;
     padding: 10px 22px 24px;
+    overflow: hidden;
+}
+
+.table-wrap {
+    height: 100%;
+    overflow-y: auto;
 }
 
 table {
@@ -187,6 +197,18 @@ th {
     justify-content: flex-end;
 }
 
+.modal-link {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 14px;
+    color: #0f62fe;
+    text-decoration: none;
+}
+
+.modal-link:hover {
+    text-decoration: underline;
+}
+
 input, textarea {
     width: 100%;
     margin: 10px 0;
@@ -231,18 +253,20 @@ input, textarea {
     </div>
 
     <div class="content">
-        <table>
-            <thead>
-                <tr>
-                    <th>番号</th>
-                    <th>タイトル</th>
-                    <th>作成者</th>
-                    <th>日付</th>
-                    <th>閲覧数</th>
-                </tr>
-            </thead>
-            <tbody id="boardBody"></tbody>
-        </table>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>番号</th>
+                        <th>タイトル</th>
+                        <th>作成者</th>
+                        <th>日付</th>
+                        <th>閲覧数</th>
+                    </tr>
+                </thead>
+                <tbody id="boardBody"></tbody>
+            </table>
+        </div>
     </div>
 
     <div class="footer">
@@ -258,6 +282,7 @@ input, textarea {
         <div class="modal-actions">
             <button id="loginBtn">ログイン</button>
         </div>
+        <a href="/signup" class="modal-link">新規登録はこちら</a>
     </div>
 </div>
 

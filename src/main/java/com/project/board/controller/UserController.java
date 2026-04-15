@@ -25,14 +25,16 @@ public class UserController {
      */
     @PostMapping("/signup")
     public String signup(@RequestParam String u, @RequestParam String p){
-
-        System.out.println("[SIGNUP] username = " + u + ", p=" + p);
-
         try {
             service.signup(u, p);
             return "OK";
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             e.printStackTrace();
+
+            if ("既に存在するユーザーです".equals(e.getMessage())) {
+                return "DUPLICATE";
+            }
+
             return "ERROR";
         }
     }
