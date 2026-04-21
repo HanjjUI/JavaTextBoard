@@ -25,6 +25,17 @@ public class BoardController {
         this.service = service;
     }
 
+    @GetMapping("/list")
+    public List<BoardDto> list() {
+        return service.findAll(PageRequest.of(0, 10), "", "")
+                .getContent();
+    }
+    
+    @GetMapping("/{id}")
+    public BoardDto detail(@PathVariable Long id) {
+        return service.findById(id);
+    }
+    
     @PostMapping("/write")
     public String write(@RequestBody BoardDto dto, HttpSession session) {
         String user = (String) session.getAttribute("loginUser");
@@ -37,11 +48,18 @@ public class BoardController {
         return "OK";
     }
 
-    @GetMapping("/{id}")
-    public BoardDto detail(@PathVariable Long id) {
-        return service.findById(id);
-    }
 
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable Long id, HttpSession session) {
+        String user = (String) session.getAttribute("loginUser");
+
+        if (user == null) {
+            return "LOGIN_REQUIRED";
+        }
+
+        service.delete(id, user);
+        return "OK";
+    }
     @PutMapping("/{id}")
     public String update(@PathVariable Long id,
                          @RequestBody BoardDto dto,
@@ -56,21 +74,5 @@ public class BoardController {
         return "OK";
     }
 
-    @DeleteMapping("/{id}")
-    public String delete(@PathVariable Long id, HttpSession session) {
-        String user = (String) session.getAttribute("loginUser");
 
-        if (user == null) {
-            return "LOGIN_REQUIRED";
-        }
-
-        service.delete(id, user);
-        return "OK";
-    }
-
-    @GetMapping("/list")
-    public List<BoardDto> list() {
-        return service.findAll(PageRequest.of(0, 10), "", "")
-                .getContent();
-    }
 }

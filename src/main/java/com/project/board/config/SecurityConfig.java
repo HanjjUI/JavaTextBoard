@@ -12,21 +12,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-            // CSRFを無効にしています
-            // 今回は学習用プロジェクトなので、動作確認をしやすくするために設定しています
-            .csrf(csrf -> csrf.disable())
-
-            // すべてのリクエストを許可しています
-            // 認可の細かい設定はまだ入れていません
-            .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
-            )
-
-            // Spring Securityのデフォルトログイン画面を使わないようにしています
-            .formLogin(form -> form.disable())
-
-            // Basic認証も使わないようにしています
-            .httpBasic(basic -> basic.disable());
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+        .formLogin(form -> form.disable())
+        .httpBasic(basic -> basic.disable());
 
         return http.build();
     }
