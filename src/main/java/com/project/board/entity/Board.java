@@ -1,73 +1,97 @@
 package com.project.board.entity;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 
-// 掲示板の投稿を表すエンティティです
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 @Entity
 public class Board {
+
+    private static final ZoneId TOKYO_ZONE = ZoneId.of("Asia/Tokyo");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 閲覧数です
-    // 最初は0から始まります
+    @Column(unique = true)
+    private Long postNumber;
+
+    @Column(nullable = false)
     private int viewCount = 0;
 
-    // 投稿内容です
-    // 長い文章も保存できるようにTEXT型にしています
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    // 投稿タイトルです
     @Column(nullable = false)
     private String title;
 
-    // 投稿者の名前です
     @Column(nullable = false)
     private String author;
 
-    // 投稿が作成された日時です
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    // JPAで必要な基本コンストラクタです
-    // 外部から勝手に生成されないようにprotectedにしています
-    protected Board(){}
-
-    // Boardオブジェクトを作成するためのメソッドです
-    // new の代わりにこちらを使うようにしています
-    public static Board create(String title, String content, String author){
-        Board b = new Board();
-        b.title = title;
-        b.content = content;
-        b.author = author;
-        return b;
+    protected Board() {
     }
 
-    // DBに保存する直前に実行されます
-    // 作成日時を自動で入れるための処理です
+    public static Board create(Long postNumber, String title, String content, String author) {
+        Board board = new Board();
+        board.postNumber = postNumber;
+        board.title = title;
+        board.content = content;
+        board.author = author;
+        return board;
+    }
+
     @PrePersist
     public void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(TOKYO_ZONE);
     }
 
-    // 投稿のタイトルと内容を修正するときに使います
-    public void update(String title, String content){
+    public void update(String title, String content) {
         this.title = title;
         this.content = content;
     }
 
-    // 閲覧数を1増やすメソッドです
-    public void increaseViewCount(){
+    public void increaseViewCount() {
         this.viewCount++;
     }
 
-    // getterです
-    public Long getId(){ return id; }
-    public String getTitle(){ return title; }
-    public String getContent(){ return content; }
-    public String getAuthor(){ return author; }
-    public int getViewCount(){ return viewCount; }
-    public LocalDateTime getCreatedAt(){ return createdAt; }
+    public void assignPostNumber(Long postNumber) {
+        this.postNumber = postNumber;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getPostNumber() {
+        return postNumber;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public int getViewCount() {
+        return viewCount;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 }

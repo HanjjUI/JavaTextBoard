@@ -1,23 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>投稿作成</title>
 
 <style>
 body {
-    font-family: Arial;
+    font-family: "Segoe UI", Arial, sans-serif;
     background: #f5f5f5;
     margin: 0;
 }
 
 .container {
     width: 900px;
-    height: 900px;
+    max-width: 94%;
+    min-height: 720px;
     margin: 40px auto;
     background: white;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
 }
@@ -25,20 +27,19 @@ body {
 .header {
     display: flex;
     align-items: center;
-    padding: 10px;
-    height: 60px;
+    padding: 14px 18px;
     border-bottom: 1px solid #ddd;
 }
 
 .header button {
-    height: 100%;
-    padding: 0 15px;
+    padding: 10px 16px;
 }
 
 .title {
     flex: 1;
     text-align: center;
     font-weight: bold;
+    font-size: 20px;
 }
 
 .content {
@@ -47,25 +48,40 @@ body {
     text-align: left;
 }
 
+label {
+    display: block;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
 input, textarea {
     width: 100%;
-    padding: 10px;
-    margin-top: 10px;
+    padding: 12px;
+    box-sizing: border-box;
     border: 1px solid #ccc;
+    border-radius: 8px;
+    font: inherit;
 }
 
 textarea {
-    height: 200px;
+    height: 360px;
+    resize: vertical;
 }
 
 .footer {
-    padding: 10px;
+    padding: 16px 20px;
     border-top: 1px solid #ddd;
     text-align: right;
 }
 
 button {
     cursor: pointer;
+    border: none;
+    background: #2f2f2f;
+    color: white;
+    border-radius: 8px;
+    padding: 10px 16px;
 }
 </style>
 </head>
@@ -73,7 +89,6 @@ button {
 <body>
 
 <div class="container">
-
     <div class="header">
         <button onclick="location.href='/'">Main</button>
         <div class="title" id="pageTitle">投稿作成</div>
@@ -81,43 +96,41 @@ button {
     </div>
 
     <div class="content">
-        <label>タイトル</label>
+        <label for="title">タイトル</label>
         <input id="title">
 
-        <label>内容</label>
+        <label for="content">内容</label>
         <textarea id="content"></textarea>
     </div>
 
     <div class="footer">
-        <button id="submitBtn" onclick="submitPost()">投稿</button>
+        <button id="submitBtn" onclick="submitPost()">保存</button>
     </div>
-
 </div>
 
 <script>
 const params = new URLSearchParams(location.search);
 const editId = params.get("id");
 
-if(editId){
+if (editId) {
     document.getElementById("pageTitle").innerText = "投稿編集";
-    document.getElementById("submitBtn").innerText = "保存";
+    document.getElementById("submitBtn").innerText = "更新";
 
-    fetch(`/board/${editId}`)
+    fetch(`/board/${editId}?increaseViewCount=false`)
         .then(res => res.json())
         .then(data => {
             document.getElementById("title").value = data.title || "";
             document.getElementById("content").value = data.content || "";
         })
         .catch(() => {
-            alert("投稿データの取得に失敗しました");
-            location.href = "/index";
+            alert("投稿情報の読み込みに失敗しました。");
+            location.href = "/";
         });
 }
 
-function submitPost(){
-
-    const title = document.getElementById("title").value;
-    const content = document.getElementById("content").value;
+function submitPost() {
+    const title = document.getElementById("title").value.trim();
+    const content = document.getElementById("content").value.trim();
 
     const method = editId ? "PUT" : "POST";
     const url = editId ? `/board/${editId}` : "/board/write";
@@ -134,22 +147,22 @@ function submitPost(){
     })
     .then(res => res.text())
     .then(data => {
-        if(data === "OK"){
-            alert(editId ? "修正完了" : "投稿完了");
-            location.href = "/index";
+        if (data === "OK") {
+            alert(editId ? "更新が完了しました。" : "投稿が完了しました。");
+            location.href = "/";
             return;
         }
 
-        if(data === "LOGIN_REQUIRED"){
-            alert("ログインが必要です");
+        if (data === "LOGIN_REQUIRED") {
+            alert("ログインが必要です。");
             location.href = "/login";
             return;
         }
 
-        alert(editId ? "修正に失敗しました" : "投稿に失敗しました");
+        alert(editId ? "更新に失敗しました。" : "投稿に失敗しました。");
     })
     .catch(() => {
-        alert("通信エラーが発生しました");
+        alert("サーバー通信中にエラーが発生しました。");
     });
 }
 </script>

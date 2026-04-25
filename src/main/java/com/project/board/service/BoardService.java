@@ -3,102 +3,100 @@ package com.project.board.service;
 import com.project.board.dto.BoardDto;
 import com.project.board.entity.Board;
 import com.project.board.repository.BoardRepository;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// 掲示板サービスです
-// 投稿に関するビジネスロジックを担当します
 @Service
 public class BoardService {
 
     private final BoardRepository repo;
 
-    // コンストラクタでRepositoryを受け取ります
-    public BoardService(BoardRepository repo){
+    public BoardService(BoardRepository repo) {
         this.repo = repo;
     }
 
-    // 投稿一覧を取得するメソッドです
-    // タイトルと投稿者名で検索できて、ページングにも対応しています
-    public Page<BoardDto> findAll(Pageable p, String k, String a){
+    public Page<BoardDto> findAll(Pageable pageable, String searchType, String keyword) {
+        String normalizedKeyword = keyword == null ? "" : keyword.trim();
+        String normalizedSearchType = searchType == null ? "titleAuthor" : searchType.trim();
 
-        // null のままだとエラーになりやすいので空文字にします
-        if(k == null) k = "";
-        if(a == null) a = "";
+        if (normalizedKeyword.isEmpty()) {
+            return repo.findAll(pageable).map(this::toDto);
+        }
 
-        return repo.findByTitleContainingAndAuthorContaining(k, a, p)
-                .map(this::toDto);
+        return switch (normalizedSearchType) {
+            case "title" -> repo.findByTitleContainingIgnoreCase(normalizedKeyword, pageable).map(this::toDto);
+            case "author" -> repo.findByAuthorContainingIgnoreCase(normalizedKeyword, pageable).map(this::toDto);
+            default -> repo.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(
+                    normalizedKeyword,
+                    normalizedKeyword,
+                    pageable
+            ).map(this::toDto);
+        };
     }
 
-    // 投稿詳細を取得するメソッドです
-    // 詳細画面を開いたときに閲覧数も1増やします
     @Transactional
-    public BoardDto findById(Long id){
+    public BoardDto findById(Long id, boolean increaseViewCount) {
+        Board board = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        Board b = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("投稿が存在しません"));
+        if (increaseViewCount) {
+            board.increaseViewCount();
+        }
 
-        // 閲覧数を増やします
-        b.increaseViewCount();
-
-        return toDto(b);
+        return toDto(board);
     }
 
-    // 新しい投稿を保存するメソッドです
-    public BoardDto save(BoardDto d, String user){
+    @Transactional
+    public BoardDto save(BoardDto dto, String user) {
+        Long nextPostNumber = repo.findTopByOrderByPostNumberDesc()
+                .map(board -> board.getPostNumber() + 1)
+                .orElse(1L);
 
-        Board b = Board.create(
-                d.getTitle(),
-                d.getContent(),
+        Board board = Board.create(
+                nextPostNumber,
+                dto.getTitle(),
+                dto.getContent(),
                 user
         );
 
-        return toDto(repo.save(b));
+        return toDto(repo.save(board));
     }
 
-    // 投稿を修正するメソッドです
-    // 投稿した本人だけ修正できるようにしています
     @Transactional
-    public BoardDto update(Long id, BoardDto d, String user){
+    public BoardDto update(Long id, BoardDto dto, String user) {
+        Board board = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        Board b = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("投稿が存在しません"));
-
-        // 投稿者本人かどうかを確認します
-        if(!b.getAuthor().equals(user)){
-            throw new RuntimeException("権限がありません");
+        if (!board.getAuthor().equals(user)) {
+            throw new RuntimeException("Forbidden");
         }
 
-        b.update(d.getTitle(), d.getContent());
-
-        return toDto(b);
+        board.update(dto.getTitle(), dto.getContent());
+        return toDto(board);
     }
 
-    // 投稿を削除するメソッドです
-    // こちらも投稿した本人だけ削除できます
-    public void delete(Long id, String user){
+    public void delete(Long id, String user) {
+        Board board = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        Board b = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("投稿が存在しません"));
-
-        // 投稿者本人かどうかを確認します
-        if(!b.getAuthor().equals(user)){
-            throw new RuntimeException("権限がありません");
+        if (!board.getAuthor().equals(user)) {
+            throw new RuntimeException("Forbidden");
         }
 
-        repo.delete(b);
+        repo.delete(board);
     }
 
-    // Entity を DTO に変換するためのメソッドです
-    private BoardDto toDto(Board b){
+    private BoardDto toDto(Board board) {
         return BoardDto.builder()
-                .id(b.getId())
-                .title(b.getTitle())
-                .content(b.getContent())
-                .author(b.getAuthor())
-                .createdAt(b.getCreatedAt())
-                .viewCount(b.getViewCount())
+                .id(board.getId())
+                .postNumber(board.getPostNumber())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .author(board.getAuthor())
+                .createdAt(board.getCreatedAt())
+                .viewCount(board.getViewCount())
                 .build();
     }
 }

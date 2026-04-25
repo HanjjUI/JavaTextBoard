@@ -13,6 +13,13 @@ body {
     color: #222;
 }
 
+button,
+select,
+input,
+textarea {
+    font: inherit;
+}
+
 button {
     cursor: pointer;
     border: none;
@@ -30,11 +37,11 @@ button:hover {
 }
 
 .container {
-    width: 900px;
+    width: 980px;
     max-width: 94%;
-    height: 78vh;
-    min-height: 620px;
-    max-height: 780px;
+    height: 80vh;
+    min-height: 640px;
+    max-height: 820px;
     margin: 36px auto;
     background: white;
     border-radius: 16px;
@@ -47,6 +54,7 @@ button:hover {
 .header {
     display: flex;
     align-items: center;
+    gap: 14px;
     padding: 18px 22px;
     border-bottom: 1px solid #e5e5e5;
     background: #fafafa;
@@ -57,7 +65,7 @@ button:hover {
     text-align: left;
     font-weight: 700;
     font-size: 20px;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 #authArea {
@@ -67,6 +75,27 @@ button:hover {
     min-width: 180px;
     justify-content: flex-end;
     font-size: 14px;
+}
+
+.toolbar {
+    padding: 18px 22px 8px;
+}
+
+.search-bar {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr) 120px;
+    gap: 12px;
+    align-items: center;
+}
+
+.search-bar select,
+.search-bar input {
+    width: 100%;
+    border: 1px solid #d6d6d6;
+    border-radius: 10px;
+    padding: 11px 14px;
+    box-sizing: border-box;
+    background: white;
 }
 
 .content {
@@ -98,6 +127,8 @@ th, td {
 th {
     background: #fafafa;
     font-weight: 700;
+    position: sticky;
+    top: 0;
 }
 
 .title-link {
@@ -112,6 +143,11 @@ th {
     text-decoration: underline;
 }
 
+.empty-row td {
+    color: #777;
+    padding: 36px 10px;
+}
+
 .footer {
     padding: 18px 22px 22px;
     text-align: right;
@@ -119,10 +155,7 @@ th {
 
 .modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     background: rgba(0, 0, 0, 0.45);
     display: none;
     justify-content: center;
@@ -144,12 +177,6 @@ th {
     margin-top: 0;
     margin-bottom: 14px;
     font-size: 20px;
-}
-
-.modal-box p {
-    line-height: 1.6;
-    margin-bottom: 18px;
-    word-break: break-word;
 }
 
 .detail-meta {
@@ -197,6 +224,7 @@ th {
     display: flex;
     gap: 8px;
     justify-content: flex-end;
+    margin-top: 16px;
 }
 
 .modal-link {
@@ -211,7 +239,7 @@ th {
     text-decoration: underline;
 }
 
-input, textarea {
+.modal-box input {
     width: 100%;
     margin: 10px 0;
     padding: 10px 12px;
@@ -237,6 +265,10 @@ input, textarea {
         min-width: auto;
     }
 
+    .search-bar {
+        grid-template-columns: 1fr;
+    }
+
     th, td {
         font-size: 13px;
         padding: 10px 6px;
@@ -250,21 +282,21 @@ input, textarea {
 <div class="container">
     <div class="header">
         <button id="mainBtn">Main</button>
-        <div class="title">掲示板一覧</div>
+        <div class="title">掲示板</div>
         <div id="authArea"></div>
     </div>
 
-<div class="search-bar">
-    <select id="searchType">
-        <option value="title">タイトル</option>
-        <option value="author">作成者</option>
-        <option value="content">内容</option>
-    </select>
-
-    <input type="text" id="searchKeyword" placeholder="検索ワード入力">
-
-    <button id="searchBtn">検索</button>
-</div>
+    <div class="toolbar">
+        <div class="search-bar">
+            <select id="searchType">
+                <option value="titleAuthor">タイトル + 作成者</option>
+                <option value="title">タイトル</option>
+                <option value="author">作成者</option>
+            </select>
+            <input type="text" id="searchKeyword" placeholder="検索キーワードを入力してください">
+            <button id="searchBtn">検索</button>
+        </div>
+    </div>
 
     <div class="content">
         <div class="table-wrap">
@@ -274,7 +306,7 @@ input, textarea {
                         <th>番号</th>
                         <th>タイトル</th>
                         <th>作成者</th>
-                        <th>日付</th>
+                        <th>作成日時</th>
                         <th>閲覧数</th>
                     </tr>
                 </thead>
@@ -284,7 +316,7 @@ input, textarea {
     </div>
 
     <div class="footer">
-        <button id="writeBtn">投稿</button>
+        <button id="writeBtn">新規投稿</button>
     </div>
 </div>
 
@@ -304,7 +336,7 @@ input, textarea {
     <div class="modal-box">
         <h3 id="detailTitle"></h3>
         <div class="detail-meta">
-            <div><span class="detail-label">番号</span><span class="detail-value" id="detailId"></span></div>
+            <div><span class="detail-label">番号</span><span class="detail-value" id="detailPostNumber"></span></div>
             <div><span class="detail-label">作成者</span><span class="detail-value" id="detailAuthor"></span></div>
             <div><span class="detail-label">作成日時</span><span class="detail-value" id="detailCreatedAt"></span></div>
             <div><span class="detail-label">閲覧数</span><span class="detail-value" id="detailViewCount"></span></div>
@@ -331,6 +363,13 @@ function escapeHTML(str) {
     });
 }
 
+function formatDateTime(value) {
+    if (!value) {
+        return "";
+    }
+    return value.replace("T", " ").substring(0, 16);
+}
+
 async function request(url, options) {
     try {
         const res = await fetch(url, options || {});
@@ -339,13 +378,18 @@ async function request(url, options) {
         }
         return res;
     } catch (e) {
-        alert("通信エラー");
+        alert("通信中にエラーが発生しました。");
         throw e;
     }
 }
 
 let currentUser = null;
 let currentPostId = null;
+
+const state = {
+    searchType: "titleAuthor",
+    keyword: ""
+};
 
 const API = {
     async getUser() {
@@ -364,13 +408,20 @@ const API = {
         return await res.text();
     },
 
-    async list() {
-        const res = await request("/board/list");
+    async list(searchType, keyword) {
+        const params = new URLSearchParams({
+            searchType: searchType,
+            keyword: keyword
+        });
+        const res = await request("/board/list?" + params.toString());
         return await res.json();
     },
 
-    async detail(id) {
-        const res = await request("/board/" + id);
+    async detail(id, increaseViewCount) {
+        const params = new URLSearchParams({
+            increaseViewCount: String(increaseViewCount)
+        });
+        const res = await request("/board/" + id + "?" + params.toString());
         return await res.json();
     },
 
@@ -408,23 +459,22 @@ async function renderAuth() {
 }
 
 async function renderBoard() {
-    const data = await API.list();
+    const data = await API.list(state.searchType, state.keyword);
     const body = document.getElementById("boardBody");
 
     if (data.length === 0) {
-        body.innerHTML = "<tr><td colspan='5'>投稿がありません</td></tr>";
+        body.innerHTML = "<tr class='empty-row'><td colspan='5'>該当する投稿がありません。</td></tr>";
         return;
     }
 
-    const rows = data.map(function(b, i) {
-        const createdAt = b.createdAt ? b.createdAt.replace("T", " ").substring(0, 16) : "";
+    const rows = data.map(function(board) {
         return (
             "<tr>" +
-            "<td>" + (i + 1) + "</td>" +
-            "<td class='title-link' data-id='" + b.id + "'>" + escapeHTML(b.title) + "</td>" +
-            "<td>" + escapeHTML(b.author) + "</td>" +
-            "<td>" + createdAt + "</td>" +
-            "<td>" + b.viewCount + "</td>" +
+            "<td>" + board.postNumber + "</td>" +
+            "<td class='title-link' data-id='" + board.id + "'>" + escapeHTML(board.title) + "</td>" +
+            "<td>" + escapeHTML(board.author) + "</td>" +
+            "<td>" + formatDateTime(board.createdAt) + "</td>" +
+            "<td>" + board.viewCount + "</td>" +
             "</tr>"
         );
     }).join("");
@@ -438,6 +488,23 @@ async function renderBoard() {
     });
 }
 
+function applySearchInputs() {
+    state.searchType = document.getElementById("searchType").value;
+    state.keyword = document.getElementById("searchKeyword").value.trim();
+}
+
+async function handleSearch() {
+    applySearchInputs();
+    await renderBoard();
+}
+
+document.getElementById("searchBtn").addEventListener("click", handleSearch);
+document.getElementById("searchKeyword").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        handleSearch();
+    }
+});
+
 document.getElementById("loginBtn").addEventListener("click", async function() {
     const u = document.getElementById("li-username").value;
     const p = document.getElementById("li-password").value;
@@ -447,8 +514,9 @@ document.getElementById("loginBtn").addEventListener("click", async function() {
     if (res === "OK") {
         closeModal();
         await renderAuth();
+        await renderBoard();
     } else {
-        alert("ログイン失敗");
+        alert("ログインに失敗しました。");
     }
 });
 
@@ -462,14 +530,13 @@ function logout() {
 async function viewDetail(id) {
     currentPostId = id;
 
-    const data = await API.detail(id);
-    const createdAt = data.createdAt ? data.createdAt.replace("T", " ").substring(0, 16) : "";
+    const data = await API.detail(id, true);
 
     document.getElementById("detailTitle").innerText = data.title;
     document.getElementById("detailContent").innerText = data.content;
-    document.getElementById("detailId").innerText = data.id;
+    document.getElementById("detailPostNumber").innerText = data.postNumber;
     document.getElementById("detailAuthor").innerText = data.author;
-    document.getElementById("detailCreatedAt").innerText = createdAt;
+    document.getElementById("detailCreatedAt").innerText = formatDateTime(data.createdAt);
     document.getElementById("detailViewCount").innerText = data.viewCount;
 
     const canManage = currentUser !== "null" && currentUser === data.author;
@@ -477,6 +544,7 @@ async function viewDetail(id) {
     document.getElementById("deleteBtn").style.display = canManage ? "inline-block" : "none";
 
     openModal("detailModal");
+    await renderBoard();
 }
 
 document.getElementById("editBtn").addEventListener("click", function() {
@@ -484,7 +552,7 @@ document.getElementById("editBtn").addEventListener("click", function() {
 });
 
 document.getElementById("deleteBtn").addEventListener("click", async function() {
-    if (!confirm("削除しますか？")) {
+    if (!confirm("この投稿を削除しますか。")) {
         return;
     }
 
@@ -497,12 +565,12 @@ document.getElementById("deleteBtn").addEventListener("click", async function() 
     }
 
     if (res === "LOGIN_REQUIRED") {
-        alert("ログインが必要です");
+        alert("ログインが必要です。");
         location.href = "/login";
         return;
     }
 
-    alert("削除に失敗しました");
+    alert("削除に失敗しました。");
 });
 
 document.getElementById("writeBtn").addEventListener("click", function() {
@@ -518,8 +586,8 @@ function openModal(id) {
 }
 
 function closeModal() {
-    document.querySelectorAll(".modal").forEach(function(m) {
-        m.style.display = "none";
+    document.querySelectorAll(".modal").forEach(function(modal) {
+        modal.style.display = "none";
     });
 }
 
@@ -530,10 +598,16 @@ window.addEventListener("click", function(e) {
 });
 
 document.getElementById("mainBtn").addEventListener("click", function() {
-    location.reload();
+    state.searchType = "titleAuthor";
+    state.keyword = "";
+    document.getElementById("searchType").value = state.searchType;
+    document.getElementById("searchKeyword").value = state.keyword;
+    renderBoard();
 });
 
 window.onload = async function() {
+    document.getElementById("searchType").value = state.searchType;
+    document.getElementById("searchKeyword").value = state.keyword;
     await renderAuth();
     await renderBoard();
 };

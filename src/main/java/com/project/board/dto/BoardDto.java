@@ -1,11 +1,14 @@
 package com.project.board.dto;
 
 import com.project.board.entity.Board;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-// 掲示板のデータを画面側へ渡すためのDTOです
 @Getter
 @Setter
 @Builder
@@ -14,21 +17,22 @@ import java.time.LocalDateTime;
 public class BoardDto {
 
     private Long id;
+    private Long postNumber;
     private String title;
     private String content;
     private String author;
     private LocalDateTime createdAt;
     private int viewCount;
 
-    // EntityからDTOに変換するためのメソッドです
-    public static BoardDto from(Board b){
+    public static BoardDto from(Board board) {
         return BoardDto.builder()
-                .id(b.getId())
-                .title(b.getTitle())
-                .content(b.getContent())
-                .author(b.getAuthor())
-                .createdAt(b.getCreatedAt())
-                .viewCount(b.getViewCount())
+                .id(board.getId())
+                .postNumber(board.getPostNumber())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .author(board.getAuthor())
+                .createdAt(board.getCreatedAt())
+                .viewCount(board.getViewCount())
                 .build();
     }
 }
