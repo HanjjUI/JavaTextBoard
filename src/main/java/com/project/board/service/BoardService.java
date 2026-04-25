@@ -50,9 +50,7 @@ public class BoardService {
 
     @Transactional
     public BoardDto save(BoardDto dto, String user) {
-        Long nextPostNumber = repo.findTopByOrderByPostNumberDesc()
-                .map(board -> board.getPostNumber() + 1)
-                .orElse(1L);
+        Long nextPostNumber = repo.findMaxPostNumber() + 1;
 
         Board board = Board.create(
                 nextPostNumber,

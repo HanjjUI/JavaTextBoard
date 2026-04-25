@@ -22,9 +22,7 @@ public class BoardDataInitializer implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
         List<Board> boardsWithoutPostNumber = boardRepository.findByPostNumberIsNullOrderByIdAsc();
-        long nextPostNumber = boardRepository.findTopByOrderByPostNumberDesc()
-                .map(board -> board.getPostNumber() + 1)
-                .orElse(1L);
+        long nextPostNumber = boardRepository.findMaxPostNumber() + 1;
 
         for (Board board : boardsWithoutPostNumber) {
             board.assignPostNumber(nextPostNumber++);

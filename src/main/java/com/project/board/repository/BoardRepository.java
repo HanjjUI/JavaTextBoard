@@ -4,8 +4,8 @@ import com.project.board.entity.Board;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-import java.util.Optional;
 import java.util.List;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
@@ -20,7 +20,8 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             Pageable pageable
     );
 
-    Optional<Board> findTopByOrderByPostNumberDesc();
+    @Query("select coalesce(max(b.postNumber), 0) from Board b")
+    Long findMaxPostNumber();
 
     List<Board> findByPostNumberIsNullOrderByIdAsc();
 }
