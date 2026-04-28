@@ -53,7 +53,6 @@ public class BoardService {
         Long nextPostNumber = repo.findMaxPostNumber() + 1;
 
         Board board = Board.create(
-                nextPostNumber,
                 dto.getTitle(),
                 dto.getContent(),
                 user
@@ -89,7 +88,6 @@ public class BoardService {
     private BoardDto toDto(Board board) {
         return BoardDto.builder()
                 .id(board.getId())
-                .postNumber(board.getPostNumber())
                 .title(board.getTitle())
                 .content(board.getContent())
                 .author(board.getAuthor())

@@ -27,7 +27,6 @@ public class BoardDto {
     public static BoardDto from(Board board) {
         return BoardDto.builder()
                 .id(board.getId())
-                .postNumber(board.getPostNumber())
                 .title(board.getTitle())
                 .content(board.getContent())
                 .author(board.getAuthor())
