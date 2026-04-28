@@ -33,7 +33,7 @@ public class BoardController {
             @RequestParam(defaultValue = "") String keyword
     ) {
         return service.findAll(
-                        PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "postNumber")),
+                        PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "id")),
                         searchType,
                         keyword
                 )
