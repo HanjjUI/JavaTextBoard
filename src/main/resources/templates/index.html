@@ -336,7 +336,7 @@ th {
     <div class="modal-box">
         <h3 id="detailTitle"></h3>
         <div class="detail-meta">
-            <div><span class="detail-label">番号</span><span class="detail-value" id="detailPostNumber"></span></div>
+            <div><span class="detail-label">番号</span><span class="detail-value" id="detailId"></span></div>
             <div><span class="detail-label">作成者</span><span class="detail-value" id="detailAuthor"></span></div>
             <div><span class="detail-label">作成日時</span><span class="detail-value" id="detailCreatedAt"></span></div>
             <div><span class="detail-label">閲覧数</span><span class="detail-value" id="detailViewCount"></span></div>
@@ -534,7 +534,7 @@ async function viewDetail(id) {
 
     document.getElementById("detailTitle").innerText = data.title;
     document.getElementById("detailContent").innerText = data.content;
-    document.getElementById("detailPostNumber").innerText = data.id;
+    document.getElementById("detailId").innerText = data.id;
     document.getElementById("detailAuthor").innerText = data.author;
     document.getElementById("detailCreatedAt").innerText = formatDateTime(data.createdAt);
     document.getElementById("detailViewCount").innerText = data.viewCount;

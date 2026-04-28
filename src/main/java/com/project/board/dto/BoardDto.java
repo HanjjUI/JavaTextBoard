@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 public class BoardDto {
 
     private Long id;
-    private Long postNumber;
     private String title;
     private String content;
     private String author;
