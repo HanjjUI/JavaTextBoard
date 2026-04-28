@@ -470,7 +470,7 @@ async function renderBoard() {
     const rows = data.map(function(board) {
         return (
             "<tr>" +
-            "<td>" + board.postNumber + "</td>" +
+            "<td>" + board.id + "</td>" +
             "<td class='title-link' data-id='" + board.id + "'>" + escapeHTML(board.title) + "</td>" +
             "<td>" + escapeHTML(board.author) + "</td>" +
             "<td>" + formatDateTime(board.createdAt) + "</td>" +
@@ -534,7 +534,7 @@ async function viewDetail(id) {
 
     document.getElementById("detailTitle").innerText = data.title;
     document.getElementById("detailContent").innerText = data.content;
-    document.getElementById("detailPostNumber").innerText = data.postNumber;
+    document.getElementById("detailPostNumber").innerText = data.id;
     document.getElementById("detailAuthor").innerText = data.author;
     document.getElementById("detailCreatedAt").innerText = formatDateTime(data.createdAt);
     document.getElementById("detailViewCount").innerText = data.viewCount;

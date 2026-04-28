@@ -19,9 +19,6 @@ public class Board {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
-    private Long postNumber;
-
     @Column(nullable = false)
     private int viewCount = 0;
 
@@ -40,9 +37,8 @@ public class Board {
     protected Board() {
     }
 
-    public static Board create(Long postNumber, String title, String content, String author) {
+    public static Board create(String title, String content, String author) {
         Board board = new Board();
-        board.postNumber = postNumber;
         board.title = title;
         board.content = content;
         board.author = author;
@@ -63,16 +59,8 @@ public class Board {
         this.viewCount++;
     }
 
-    public void assignPostNumber(Long postNumber) {
-        this.postNumber = postNumber;
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public Long getPostNumber() {
-        return postNumber;
     }
 
     public String getTitle() {
