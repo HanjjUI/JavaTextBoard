@@ -18,12 +18,17 @@ public class UserService {
     }
 
     public void signup(String username, String password) {
+        System.out.println("=== UserService.signup 실행됨 ===");
+
         if (repo.findByUsername(username).isPresent()) {
             throw new IllegalArgumentException("DUPLICATE_USERNAME");
         }
 
         User user = new User(username, encoder.encode(password));
         user.setCreatedAt(LocalDateTime.now());
+
+        System.out.println("createdAt = " + user.getCreatedAt());
+
         repo.save(user);
     }
 
