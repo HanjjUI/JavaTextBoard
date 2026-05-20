@@ -55,7 +55,7 @@ public class OpenAiService {
 
         String answer = extractText(response);
         if (answer == null || answer.isBlank()) {
-            throw new IllegalStateException("AI response was empty");
+            throw new IllegalStateException("AI response was empty: " + summarizeResponse(response));
         }
 
         return answer.trim();
@@ -65,6 +65,12 @@ public class OpenAiService {
         return Map.of(
                 "model", model,
                 "instructions", "Answer in Korean. Write a helpful board-post body for the user's title or question. Keep it practical, friendly, and ready to paste into a post.",
+                "reasoning", Map.of(
+                        "effort", "minimal"
+                ),
+                "text", Map.of(
+                        "verbosity", "low"
+                ),
                 "input", List.of(
                         Map.of(
                                 "role", "user",
@@ -76,7 +82,7 @@ public class OpenAiService {
                                 )
                         )
                 ),
-                "max_output_tokens", 700
+                "max_output_tokens", 2000
         );
     }
 
@@ -99,6 +105,21 @@ public class OpenAiService {
         }
 
         return e.getStatusCode() + " " + e.getStatusText();
+    }
+
+    private String summarizeResponse(JsonNode response) {
+        if (response == null) {
+            return "no response body";
+        }
+
+        String status = response.path("status").asText("unknown status");
+        String incompleteReason = response.path("incomplete_details").path("reason").asText("");
+
+        if (!incompleteReason.isBlank()) {
+            return status + " (" + incompleteReason + ")";
+        }
+
+        return status;
     }
 
     private String extractText(JsonNode response) {
