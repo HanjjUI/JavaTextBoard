@@ -37,6 +37,9 @@ public class Board {
     @Column(length = 500)
     private String imageUrl;
 
+    @Column
+    private Boolean deleted = false;
+
     protected Board() {
     }
 
@@ -62,6 +65,14 @@ public class Board {
 
     public void increaseViewCount() {
         this.viewCount++;
+    }
+
+    public void softDelete() {
+        this.deleted = Boolean.TRUE;
+    }
+
+    public boolean isDeleted() {
+        return Boolean.TRUE.equals(deleted);
     }
 
     public Long getId() {

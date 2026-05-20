@@ -22,14 +22,19 @@ public class BoardService {
         String normalizedSearchType = searchType == null ? "titleAuthor" : searchType.trim();
 
         if (normalizedKeyword.isEmpty()) {
-            return repo.findAll(pageable).map(BoardDto::from);
+            return repo.findActive(pageable).map(BoardDto::from);
         }
 
         return switch (normalizedSearchType) {
-            case "title" -> repo.findByTitleContainingIgnoreCase(normalizedKeyword, pageable).map(BoardDto::from);
-            case "author" -> repo.findByAuthorContainingIgnoreCase(normalizedKeyword, pageable).map(BoardDto::from);
-            default -> repo.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(
+            case "title" -> repo.findActiveByTitle(
                     normalizedKeyword,
+                    pageable
+            ).map(BoardDto::from);
+            case "author" -> repo.findActiveByAuthor(
+                    normalizedKeyword,
+                    pageable
+            ).map(BoardDto::from);
+            default -> repo.findActiveByTitleOrAuthor(
                     normalizedKeyword,
                     pageable
             ).map(BoardDto::from);
@@ -73,11 +78,12 @@ public class BoardService {
         Board board = findBoard(id);
         validateOwner(board, user);
 
-        repo.delete(board);
+        board.softDelete();
     }
 
     private Board findBoard(Long id) {
         return repo.findById(id)
+                .filter(board -> !board.isDeleted())
                 .orElseThrow(() -> new RuntimeException("Post not found"));
     }
 
