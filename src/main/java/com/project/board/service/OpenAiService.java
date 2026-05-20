@@ -64,7 +64,7 @@ public class OpenAiService {
     private Map<String, Object> createRequestBody(String question) {
         return Map.of(
                 "model", model,
-                "instructions", "Answer in Korean. Write a helpful board-post body for the user's title or question. Keep it practical, friendly, and ready to paste into a post.",
+                "instructions", "Answer in Japanese. Write a helpful board-post body for the user's title or question. Keep it practical, friendly, and ready to paste into a post.",
                 "reasoning", Map.of(
                         "effort", "minimal"
                 ),
