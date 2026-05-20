@@ -1,90 +1,68 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Spring Boot の親設定です -->
-    <!-- バージョン管理をある程度まとめてやってくれるので便利です -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.5</version>
     </parent>
 
-    <!-- 自分のプロジェクト情報です -->
     <groupId>com.project</groupId>
     <artifactId>board</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
-        <!-- Java 17 を使います -->
         <java.version>17</java.version>
     </properties>
 
     <dependencies>
-
-        <!-- Web機能です -->
-        <!-- Controller と REST API を作るときに使います -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- DBと連携するためのJPAです -->
-        <!-- Entity, Repository などを使うために必要です -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- 画面表示用のテンプレートエンジンです -->
-        <!-- サーバーサイドでHTMLを返したいときに使います -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
-        <!-- ログイン・認証まわりで使うSecurityです -->
-        <!-- ポートフォリオでは「認証機能あり」を見せやすいです -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- 本番環境で使うPostgreSQLです -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- ローカルで簡単に試すためのH2です -->
-        <!-- 開発初期にDB設定を軽くしたいときに便利です -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Lombokです -->
-        <!-- getter, setter, constructor などを自動で作ってくれます -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- テスト用です -->
-        <!-- 単体テストやSpringのテストを書くときに使います -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Spring Boot アプリを実行・ビルドするためのプラグインです -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

@@ -1,31 +1,39 @@
 package com.project.board.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
-// ユーザーエンティティ
 @Entity
-@Table(name="users")
+@Table(name = "users")
 public class User {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ユーザー名（重複不可）
     @Column(unique = true, nullable = false)
     private String username;
 
-    // パスワード（暗号化して保存）
     @Column(nullable = false)
     private String password;
 
-    protected User(){}
+    protected User() {
+    }
 
-    // コンストラクタで初期化
-    public User(String username, String password){
+    public User(String username, String password) {
         this.username = username;
         this.password = password;
     }
 
-    public String getUsername(){ return username; }
-    public String getPassword(){ return password; }
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
 }

@@ -1,5 +1,6 @@
 package com.project.board.controller;
 
+import com.project.board.common.SessionNames;
 import com.project.board.dto.BoardDto;
 import com.project.board.service.BoardService;
 import jakarta.servlet.http.HttpSession;
@@ -21,6 +22,9 @@ import java.util.List;
 @RequestMapping("/board")
 public class BoardController {
 
+    private static final int DEFAULT_PAGE_SIZE = 100;
+    private static final String LOGIN_REQUIRED = "LOGIN_REQUIRED";
+
     private final BoardService service;
 
     public BoardController(BoardService service) {
@@ -32,12 +36,13 @@ public class BoardController {
             @RequestParam(defaultValue = "titleAuthor") String searchType,
             @RequestParam(defaultValue = "") String keyword
     ) {
-        return service.findAll(
-                        PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "id")),
-                        searchType,
-                        keyword
-                )
-                .getContent();
+        PageRequest pageRequest = PageRequest.of(
+                0,
+                DEFAULT_PAGE_SIZE,
+                Sort.by(Sort.Direction.DESC, "id")
+        );
+
+        return service.findAll(pageRequest, searchType, keyword).getContent();
     }
 
     @GetMapping("/{id}")
@@ -50,25 +55,13 @@ public class BoardController {
 
     @PostMapping("/write")
     public String write(@RequestBody BoardDto dto, HttpSession session) {
-        String user = (String) session.getAttribute("loginUser");
+        String user = getLoginUser(session);
 
         if (user == null) {
-            return "LOGIN_REQUIRED";
+            return LOGIN_REQUIRED;
         }
 
         service.save(dto, user);
-        return "OK";
-    }
-
-    @DeleteMapping("/{id}")
-    public String delete(@PathVariable Long id, HttpSession session) {
-        String user = (String) session.getAttribute("loginUser");
-
-        if (user == null) {
-            return "LOGIN_REQUIRED";
-        }
-
-        service.delete(id, user);
         return "OK";
     }
 
@@ -78,13 +71,29 @@ public class BoardController {
             @RequestBody BoardDto dto,
             HttpSession session
     ) {
-        String user = (String) session.getAttribute("loginUser");
+        String user = getLoginUser(session);
 
         if (user == null) {
-            return "LOGIN_REQUIRED";
+            return LOGIN_REQUIRED;
         }
 
         service.update(id, dto, user);
         return "OK";
+    }
+
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable Long id, HttpSession session) {
+        String user = getLoginUser(session);
+
+        if (user == null) {
+            return LOGIN_REQUIRED;
+        }
+
+        service.delete(id, user);
+        return "OK";
+    }
+
+    private String getLoginUser(HttpSession session) {
+        return (String) session.getAttribute(SessionNames.LOGIN_USER);
     }
 }

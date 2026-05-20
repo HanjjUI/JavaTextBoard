@@ -22,30 +22,29 @@ public class BoardService {
         String normalizedSearchType = searchType == null ? "titleAuthor" : searchType.trim();
 
         if (normalizedKeyword.isEmpty()) {
-            return repo.findAll(pageable).map(this::toDto);
+            return repo.findAll(pageable).map(BoardDto::from);
         }
 
         return switch (normalizedSearchType) {
-            case "title" -> repo.findByTitleContainingIgnoreCase(normalizedKeyword, pageable).map(this::toDto);
-            case "author" -> repo.findByAuthorContainingIgnoreCase(normalizedKeyword, pageable).map(this::toDto);
+            case "title" -> repo.findByTitleContainingIgnoreCase(normalizedKeyword, pageable).map(BoardDto::from);
+            case "author" -> repo.findByAuthorContainingIgnoreCase(normalizedKeyword, pageable).map(BoardDto::from);
             default -> repo.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(
                     normalizedKeyword,
                     normalizedKeyword,
                     pageable
-            ).map(this::toDto);
+            ).map(BoardDto::from);
         };
     }
 
     @Transactional
     public BoardDto findById(Long id, boolean increaseViewCount) {
-        Board board = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+        Board board = findBoard(id);
 
         if (increaseViewCount) {
             board.increaseViewCount();
         }
 
-        return toDto(board);
+        return BoardDto.from(board);
     }
 
     @Transactional
@@ -53,44 +52,38 @@ public class BoardService {
         Board board = Board.create(
                 dto.getTitle(),
                 dto.getContent(),
-                user
+                user,
+                dto.getImageUrl()
         );
 
-        return toDto(repo.save(board));
+        return BoardDto.from(repo.save(board));
     }
 
     @Transactional
     public BoardDto update(Long id, BoardDto dto, String user) {
-        Board board = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+        Board board = findBoard(id);
+        validateOwner(board, user);
 
-        if (!board.getAuthor().equals(user)) {
-            throw new RuntimeException("Forbidden");
-        }
-
-        board.update(dto.getTitle(), dto.getContent());
-        return toDto(board);
+        board.update(dto.getTitle(), dto.getContent(), dto.getImageUrl());
+        return BoardDto.from(board);
     }
 
+    @Transactional
     public void delete(Long id, String user) {
-        Board board = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
-
-        if (!board.getAuthor().equals(user)) {
-            throw new RuntimeException("Forbidden");
-        }
+        Board board = findBoard(id);
+        validateOwner(board, user);
 
         repo.delete(board);
     }
 
-    private BoardDto toDto(Board board) {
-        return BoardDto.builder()
-                .id(board.getId())
-                .title(board.getTitle())
-                .content(board.getContent())
-                .author(board.getAuthor())
-                .createdAt(board.getCreatedAt())
-                .viewCount(board.getViewCount())
-                .build();
+    private Board findBoard(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+    }
+
+    private void validateOwner(Board board, String user) {
+        if (!board.getAuthor().equals(user)) {
+            throw new RuntimeException("Forbidden");
+        }
     }
 }

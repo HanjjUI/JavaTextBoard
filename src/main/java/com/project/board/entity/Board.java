@@ -34,14 +34,18 @@ public class Board {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(length = 500)
+    private String imageUrl;
+
     protected Board() {
     }
 
-    public static Board create(String title, String content, String author) {
+    public static Board create(String title, String content, String author, String imageUrl) {
         Board board = new Board();
         board.title = title;
         board.content = content;
         board.author = author;
+        board.imageUrl = imageUrl;
         return board;
     }
 
@@ -50,9 +54,10 @@ public class Board {
         this.createdAt = LocalDateTime.now(TOKYO_ZONE);
     }
 
-    public void update(String title, String content) {
+    public void update(String title, String content, String imageUrl) {
         this.title = title;
         this.content = content;
+        this.imageUrl = imageUrl;
     }
 
     public void increaseViewCount() {
@@ -81,5 +86,9 @@ public class Board {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 }

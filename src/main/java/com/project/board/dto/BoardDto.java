@@ -22,6 +22,7 @@ public class BoardDto {
     private String author;
     private LocalDateTime createdAt;
     private int viewCount;
+    private String imageUrl;
 
     public static BoardDto from(Board board) {
         return BoardDto.builder()
@@ -31,6 +32,7 @@ public class BoardDto {
                 .author(board.getAuthor())
                 .createdAt(board.getCreatedAt())
                 .viewCount(board.getViewCount())
+                .imageUrl(board.getImageUrl())
                 .build();
     }
 }

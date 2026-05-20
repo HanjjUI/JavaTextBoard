@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>投稿作成</title>
+<title>Post Editor</title>
 
 <style>
 body {
@@ -69,6 +69,42 @@ textarea {
     resize: vertical;
 }
 
+.field-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 18px;
+    margin-bottom: 8px;
+}
+
+.field-header label {
+    margin: 0;
+}
+
+.ai-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ai-tools button {
+    padding: 8px 12px;
+    background: #0f62fe;
+}
+
+.ai-tools button:disabled {
+    cursor: not-allowed;
+    background: #8aaef8;
+}
+
+.ai-status {
+    min-width: 90px;
+    color: #666;
+    font-size: 13px;
+    text-align: right;
+}
+
 .footer {
     padding: 16px 20px;
     border-top: 1px solid #ddd;
@@ -90,21 +126,30 @@ button {
 
 <div class="container">
     <div class="header">
-        <button onclick="location.href='/'">Main</button>
-        <div class="title" id="pageTitle">投稿作成</div>
+        <button onclick="location.href='/'">Home</button>
+        <div class="title" id="pageTitle">New Post</div>
         <div></div>
     </div>
 
     <div class="content">
-        <label for="title">タイトル</label>
+        <div class="field-header">
+            <label for="title">Title / Question</label>
+            <div class="ai-tools">
+                <span class="ai-status" id="aiStatus"></span>
+                <button id="aiBtn" type="button" onclick="generateAiAnswer()">AI Answer</button>
+            </div>
+        </div>
         <input id="title">
 
-        <label for="content">内容</label>
+        <label for="imageUrl">Image URL</label>
+        <input id="imageUrl" placeholder="Optional">
+
+        <label for="content">Content</label>
         <textarea id="content"></textarea>
     </div>
 
     <div class="footer">
-        <button id="submitBtn" onclick="submitPost()">保存</button>
+        <button id="submitBtn" onclick="submitPost()">Save</button>
     </div>
 </div>
 
@@ -113,24 +158,31 @@ const params = new URLSearchParams(location.search);
 const editId = params.get("id");
 
 if (editId) {
-    document.getElementById("pageTitle").innerText = "投稿編集";
-    document.getElementById("submitBtn").innerText = "更新";
+    document.getElementById("pageTitle").innerText = "Edit Post";
+    document.getElementById("submitBtn").innerText = "Update";
 
     fetch(`/board/${editId}?increaseViewCount=false`)
         .then(res => res.json())
         .then(data => {
             document.getElementById("title").value = data.title || "";
+            document.getElementById("imageUrl").value = data.imageUrl || "";
             document.getElementById("content").value = data.content || "";
         })
         .catch(() => {
-            alert("投稿情報の読み込みに失敗しました。");
+            alert("Could not load the post.");
             location.href = "/";
         });
 }
 
 function submitPost() {
     const title = document.getElementById("title").value.trim();
+    const imageUrl = document.getElementById("imageUrl").value.trim();
     const content = document.getElementById("content").value.trim();
+
+    if (!title || !content) {
+        alert("Title and content are required.");
+        return;
+    }
 
     const method = editId ? "PUT" : "POST";
     const url = editId ? `/board/${editId}` : "/board/write";
@@ -142,27 +194,71 @@ function submitPost() {
         },
         body: JSON.stringify({
             title: title,
+            imageUrl: imageUrl,
             content: content
         })
     })
     .then(res => res.text())
     .then(data => {
         if (data === "OK") {
-            alert(editId ? "更新が完了しました。" : "投稿が完了しました。");
+            alert(editId ? "Post updated." : "Post created.");
             location.href = "/";
             return;
         }
 
         if (data === "LOGIN_REQUIRED") {
-            alert("ログインが必要です。");
+            alert("Login is required.");
             location.href = "/login";
             return;
         }
 
-        alert(editId ? "更新に失敗しました。" : "投稿に失敗しました。");
+        alert(editId ? "Could not update the post." : "Could not create the post.");
     })
     .catch(() => {
-        alert("サーバー通信中にエラーが発生しました。");
+        alert("Could not reach the server.");
+    });
+}
+
+function setAiLoading(isLoading) {
+    document.getElementById("aiBtn").disabled = isLoading;
+    document.getElementById("aiStatus").innerText = isLoading ? "Writing..." : "";
+}
+
+function generateAiAnswer() {
+    const question = document.getElementById("title").value.trim();
+    const content = document.getElementById("content");
+
+    if (!question) {
+        alert("Enter a title or question first.");
+        return;
+    }
+
+    setAiLoading(true);
+
+    fetch("/ai/answer", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            question: question
+        })
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error();
+        }
+        return res.json();
+    })
+    .then(data => {
+        content.value = data.answer || "";
+        content.focus();
+    })
+    .catch(() => {
+        alert("Could not generate an AI answer. Check OPENAI_API_KEY on the server.");
+    })
+    .finally(() => {
+        setAiLoading(false);
     });
 }
 </script>

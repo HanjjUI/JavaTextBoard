@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>掲示板一覧</title>
+    <title>Post List</title>
 
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             text-align: center;
             margin-top: 40px;
         }
@@ -41,18 +41,18 @@
 
 <body>
 
-<h2>掲示板一覧</h2>
+<h2>Post List</h2>
 
-<button onclick="location.href='/board/write'">投稿作成</button>
+<button onclick="location.href='/board/write'">New Post</button>
 
 <table>
     <thead>
         <tr>
             <th>ID</th>
-            <th>タイトル</th>
-            <th>作成者</th>
-            <th>作成日</th>
-            <th>閲覧数</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Created</th>
+            <th>Views</th>
         </tr>
     </thead>
 
@@ -60,36 +60,30 @@
 </table>
 
 <script>
-// 投稿一覧を取得します
 fetch("/board/list")
     .then(res => res.json())
     .then(data => {
-
         const list = document.getElementById("list");
 
-        // 投稿が1件もない場合の表示です
-        if(data.length === 0){
-            list.innerHTML = "<tr><td colspan='5'>投稿がありません</td></tr>";
+        if (data.length === 0) {
+            list.innerHTML = "<tr><td colspan='5'>No posts yet.</td></tr>";
             return;
         }
 
-        // 取得した投稿データを1件ずつ画面に表示します
-        data.forEach(b => {
-
+        data.forEach(board => {
             list.innerHTML +=
                 "<tr>" +
-                "<td>" + b.id + "</td>" +
-                "<td><a href='/board/" + b.id + "'>" + b.title + "</a></td>" +
-                "<td>" + b.author + "</td>" +
-                "<td>" + (b.createdAt ? b.createdAt.replace('T',' ').substring(0,16) : '') + "</td>" +
-                "<td>" + b.viewCount + "</td>" +
+                "<td>" + board.id + "</td>" +
+                "<td><a href='/board/" + board.id + "'>" + board.title + "</a></td>" +
+                "<td>" + board.author + "</td>" +
+                "<td>" + (board.createdAt ? board.createdAt.replace('T', ' ').substring(0, 16) : '') + "</td>" +
+                "<td>" + board.viewCount + "</td>" +
                 "</tr>";
         });
     })
     .catch(() => {
-        // データの取得に失敗した場合の表示です
         document.getElementById("list").innerHTML =
-            "<tr><td colspan='5'>データ取得エラー</td></tr>";
+            "<tr><td colspan='5'>Could not load posts.</td></tr>";
     });
 </script>
 

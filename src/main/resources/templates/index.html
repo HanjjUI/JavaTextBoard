@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>掲示板アプリ</title>
+<title>Board</title>
 
 <style>
 body {
@@ -65,7 +65,6 @@ button:hover {
     text-align: left;
     font-weight: 700;
     font-size: 20px;
-    letter-spacing: 0.3px;
 }
 
 #authArea {
@@ -220,6 +219,15 @@ th {
     min-height: 80px;
 }
 
+.detail-image {
+    display: none;
+    max-width: 100%;
+    max-height: 280px;
+    object-fit: contain;
+    margin-bottom: 16px;
+    border-radius: 8px;
+}
+
 .modal-actions {
     display: flex;
     gap: 8px;
@@ -281,20 +289,20 @@ th {
 
 <div class="container">
     <div class="header">
-        <button id="mainBtn">Main</button>
-        <div class="title">掲示板</div>
+        <button id="mainBtn">Home</button>
+        <div class="title">Board</div>
         <div id="authArea"></div>
     </div>
 
     <div class="toolbar">
         <div class="search-bar">
             <select id="searchType">
-                <option value="titleAuthor">タイトル + 作成者</option>
-                <option value="title">タイトル</option>
-                <option value="author">作成者</option>
+                <option value="titleAuthor">Title + Author</option>
+                <option value="title">Title</option>
+                <option value="author">Author</option>
             </select>
-            <input type="text" id="searchKeyword" placeholder="検索キーワードを入力してください">
-            <button id="searchBtn">検索</button>
+            <input type="text" id="searchKeyword" placeholder="Search posts">
+            <button id="searchBtn">Search</button>
         </div>
     </div>
 
@@ -303,11 +311,11 @@ th {
             <table>
                 <thead>
                     <tr>
-                        <th>番号</th>
-                        <th>タイトル</th>
-                        <th>作成者</th>
-                        <th>作成日時</th>
-                        <th>閲覧数</th>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Created</th>
+                        <th>Views</th>
                     </tr>
                 </thead>
                 <tbody id="boardBody"></tbody>
@@ -316,35 +324,36 @@ th {
     </div>
 
     <div class="footer">
-        <button id="writeBtn">新規投稿</button>
+        <button id="writeBtn">New Post</button>
     </div>
 </div>
 
 <div class="modal" id="loginModal">
     <div class="modal-box">
-        <h3>ログイン</h3>
-        <input id="li-username" placeholder="ユーザー名">
-        <input id="li-password" type="password" placeholder="パスワード">
+        <h3>Login</h3>
+        <input id="li-username" placeholder="Username">
+        <input id="li-password" type="password" placeholder="Password">
         <div class="modal-actions">
-            <button id="loginBtn">ログイン</button>
+            <button id="loginBtn">Login</button>
         </div>
-        <a href="/signup" class="modal-link">新規登録はこちら</a>
+        <a href="/signup" class="modal-link">Create an account</a>
     </div>
 </div>
 
 <div class="modal" id="detailModal">
     <div class="modal-box">
         <h3 id="detailTitle"></h3>
+        <img class="detail-image" id="detailImage" alt="">
         <div class="detail-meta">
-            <div><span class="detail-label">番号</span><span class="detail-value" id="detailId"></span></div>
-            <div><span class="detail-label">作成者</span><span class="detail-value" id="detailAuthor"></span></div>
-            <div><span class="detail-label">作成日時</span><span class="detail-value" id="detailCreatedAt"></span></div>
-            <div><span class="detail-label">閲覧数</span><span class="detail-value" id="detailViewCount"></span></div>
+            <div><span class="detail-label">ID</span><span class="detail-value" id="detailId"></span></div>
+            <div><span class="detail-label">Author</span><span class="detail-value" id="detailAuthor"></span></div>
+            <div><span class="detail-label">Created</span><span class="detail-value" id="detailCreatedAt"></span></div>
+            <div><span class="detail-label">Views</span><span class="detail-value" id="detailViewCount"></span></div>
         </div>
         <div class="detail-content" id="detailContent"></div>
         <div class="modal-actions">
-            <button id="editBtn">編集</button>
-            <button id="deleteBtn">削除</button>
+            <button id="editBtn">Edit</button>
+            <button id="deleteBtn">Delete</button>
         </div>
     </div>
 </div>
@@ -378,7 +387,7 @@ async function request(url, options) {
         }
         return res;
     } catch (e) {
-        alert("通信中にエラーが発生しました。");
+        alert("Could not reach the server.");
         throw e;
     }
 }
@@ -397,13 +406,13 @@ const API = {
         return await res.text();
     },
 
-    async login(u, p) {
+    async login(username, password) {
         const res = await request("/user/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
-            body: "u=" + encodeURIComponent(u) + "&p=" + encodeURIComponent(p)
+            body: "u=" + encodeURIComponent(username) + "&p=" + encodeURIComponent(password)
         });
         return await res.text();
     },
@@ -440,13 +449,13 @@ async function renderAuth() {
     if (currentUser !== "null") {
         area.innerHTML =
             "<span>" + escapeHTML(currentUser) + "</span>" +
-            "<button id='logoutBtn'>ログアウト</button>";
+            "<button id='logoutBtn'>Logout</button>";
 
         document.getElementById("logoutBtn").addEventListener("click", logout);
     } else {
         area.innerHTML =
-            "<button id='signupBtn'>新規登録</button>" +
-            "<button id='openLoginBtn'>ログイン</button>";
+            "<button id='signupBtn'>Sign Up</button>" +
+            "<button id='openLoginBtn'>Login</button>";
 
         document.getElementById("signupBtn").addEventListener("click", function() {
             location.href = "/signup";
@@ -463,11 +472,11 @@ async function renderBoard() {
     const body = document.getElementById("boardBody");
 
     if (data.length === 0) {
-        body.innerHTML = "<tr class='empty-row'><td colspan='5'>該当する投稿がありません。</td></tr>";
+        body.innerHTML = "<tr class='empty-row'><td colspan='5'>No posts yet.</td></tr>";
         return;
     }
 
-    const rows = data.map(function(board) {
+    body.innerHTML = data.map(function(board) {
         return (
             "<tr>" +
             "<td>" + board.id + "</td>" +
@@ -478,8 +487,6 @@ async function renderBoard() {
             "</tr>"
         );
     }).join("");
-
-    body.innerHTML = rows;
 
     document.querySelectorAll(".title-link").forEach(function(el) {
         el.addEventListener("click", function(e) {
@@ -506,17 +513,16 @@ document.getElementById("searchKeyword").addEventListener("keydown", function(ev
 });
 
 document.getElementById("loginBtn").addEventListener("click", async function() {
-    const u = document.getElementById("li-username").value;
-    const p = document.getElementById("li-password").value;
+    const username = document.getElementById("li-username").value;
+    const password = document.getElementById("li-password").value;
+    const result = await API.login(username, password);
 
-    const res = await API.login(u, p);
-
-    if (res === "OK") {
+    if (result === "OK") {
         closeModal();
         await renderAuth();
         await renderBoard();
     } else {
-        alert("ログインに失敗しました。");
+        alert("Check your username or password.");
     }
 });
 
@@ -531,6 +537,7 @@ async function viewDetail(id) {
     currentPostId = id;
 
     const data = await API.detail(id, true);
+    const image = document.getElementById("detailImage");
 
     document.getElementById("detailTitle").innerText = data.title;
     document.getElementById("detailContent").innerText = data.content;
@@ -538,6 +545,14 @@ async function viewDetail(id) {
     document.getElementById("detailAuthor").innerText = data.author;
     document.getElementById("detailCreatedAt").innerText = formatDateTime(data.createdAt);
     document.getElementById("detailViewCount").innerText = data.viewCount;
+
+    if (data.imageUrl) {
+        image.src = data.imageUrl;
+        image.style.display = "block";
+    } else {
+        image.removeAttribute("src");
+        image.style.display = "none";
+    }
 
     const canManage = currentUser !== "null" && currentUser === data.author;
     document.getElementById("editBtn").style.display = canManage ? "inline-block" : "none";
@@ -552,25 +567,25 @@ document.getElementById("editBtn").addEventListener("click", function() {
 });
 
 document.getElementById("deleteBtn").addEventListener("click", async function() {
-    if (!confirm("この投稿を削除しますか。")) {
+    if (!confirm("Delete this post?")) {
         return;
     }
 
-    const res = await API.delete(currentPostId);
+    const result = await API.delete(currentPostId);
 
-    if (res === "OK") {
+    if (result === "OK") {
         closeModal();
         await renderBoard();
         return;
     }
 
-    if (res === "LOGIN_REQUIRED") {
-        alert("ログインが必要です。");
+    if (result === "LOGIN_REQUIRED") {
+        alert("Login is required.");
         location.href = "/login";
         return;
     }
 
-    alert("削除に失敗しました。");
+    alert("Could not delete the post.");
 });
 
 document.getElementById("writeBtn").addEventListener("click", function() {
