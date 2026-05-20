@@ -55,7 +55,7 @@ label {
     font-weight: 600;
 }
 
-input, textarea {
+input, select, textarea {
     width: 100%;
     padding: 12px;
     box-sizing: border-box;
@@ -86,6 +86,12 @@ textarea {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.ai-tools select {
+    width: auto;
+    min-width: 120px;
+    padding: 8px 10px;
 }
 
 .ai-tools button {
@@ -136,6 +142,12 @@ button {
             <label for="title">Title / Question</label>
             <div class="ai-tools">
                 <span class="ai-status" id="aiStatus"></span>
+                <select id="aiLanguage" aria-label="AI answer language">
+                    <option value="ja" selected>日本語</option>
+                    <option value="auto">Auto</option>
+                    <option value="ko">한국어</option>
+                    <option value="en">English</option>
+                </select>
                 <button id="aiBtn" type="button" onclick="generateAiAnswer()">AI Answer</button>
             </div>
         </div>
@@ -221,11 +233,13 @@ function submitPost() {
 
 function setAiLoading(isLoading) {
     document.getElementById("aiBtn").disabled = isLoading;
+    document.getElementById("aiLanguage").disabled = isLoading;
     document.getElementById("aiStatus").innerText = isLoading ? "Writing..." : "";
 }
 
 function generateAiAnswer() {
     const question = document.getElementById("title").value.trim();
+    const language = document.getElementById("aiLanguage").value;
     const content = document.getElementById("content");
 
     if (!question) {
@@ -241,7 +255,8 @@ function generateAiAnswer() {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            question: question
+            question: question,
+            language: language
         })
     })
     .then(res => {

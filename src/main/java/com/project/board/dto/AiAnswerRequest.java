@@ -8,4 +8,5 @@ import lombok.Setter;
 public class AiAnswerRequest {
 
     private String question;
+    private String language;
 }

@@ -7,6 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -20,6 +22,9 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(name="created_at")
+    private LocalDateTime createdAt;
 
     protected User() {
     }
@@ -35,5 +40,12 @@ public class User {
 
     public String getPassword() {
         return password;
+    }
+
+    public LocalDateTime getCreatedAt(){
+        return createdAt;
+    }
+    public void setCreatedAt(LocalDateTime createdAt){
+        this.createdAt = createdAt;
     }
 }

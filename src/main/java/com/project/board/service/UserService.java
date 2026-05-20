@@ -5,6 +5,8 @@ import com.project.board.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class UserService {
 
@@ -21,6 +23,7 @@ public class UserService {
         }
 
         User user = new User(username, encoder.encode(password));
+        user.setCreatedAt(LocalDateTime.now());
         repo.save(user);
     }
 

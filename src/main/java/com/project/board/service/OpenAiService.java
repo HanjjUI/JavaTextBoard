@@ -30,7 +30,7 @@ public class OpenAiService {
         this.model = normalizeModel(model);
     }
 
-    public String answer(String question) {
+    public String answer(String question, String language) {
         if (apiKey == null || apiKey.isBlank()) {
             throw new IllegalStateException("OPENAI_API_KEY is not configured");
         }
@@ -46,7 +46,7 @@ public class OpenAiService {
                     .uri(RESPONSES_URL)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey.trim())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(createRequestBody(normalizedQuestion))
+                    .body(createRequestBody(normalizedQuestion, resolveLanguageInstruction(normalizedQuestion, language)))
                     .retrieve()
                     .body(JsonNode.class);
         } catch (RestClientResponseException e) {
@@ -61,10 +61,10 @@ public class OpenAiService {
         return answer.trim();
     }
 
-    private Map<String, Object> createRequestBody(String question) {
+    private Map<String, Object> createRequestBody(String question, String languageInstruction) {
         return Map.of(
                 "model", model,
-                "instructions", "Detect the user's language and answer in the same language. If the user writes in Korean, answer in Korean. If the user writes in Japanese, answer in Japanese. Write a helpful board-post body for the user's title or question. Keep it practical, friendly, and ready to paste into a post.",
+                "instructions", languageInstruction + " Write a helpful board-post body for the user's title or question. Keep it practical, friendly, and ready to paste into a post.",
                 "reasoning", Map.of(
                         "effort", "minimal"
                 ),
@@ -84,6 +84,30 @@ public class OpenAiService {
                 ),
                 "max_output_tokens", 2000
         );
+    }
+
+    private String detectLanguageInstruction(String question) {
+        if (question.matches(".*[\\u3040-\\u30ff].*")) {
+            return "Answer only in Japanese.";
+        }
+
+        if (question.matches(".*[\\uac00-\\ud7af].*")) {
+            return "Answer only in Korean.";
+        }
+
+        return "Detect the user's language and answer in the same language.";
+    }
+
+    private String resolveLanguageInstruction(String question, String language) {
+        String normalizedLanguage = language == null ? "ja" : language.trim().toLowerCase();
+
+        return switch (normalizedLanguage) {
+            case "auto" -> detectLanguageInstruction(question);
+            case "ko" -> "Answer only in Korean.";
+            case "en" -> "Answer only in English.";
+            case "ja" -> "Answer only in Japanese.";
+            default -> "Answer only in Japanese.";
+        };
     }
 
     private String normalizeModel(String value) {

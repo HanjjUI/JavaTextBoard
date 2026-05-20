@@ -25,7 +25,7 @@ public class AiController {
 
     @PostMapping("/answer")
     public AiAnswerResponse answer(@RequestBody AiAnswerRequest request) {
-        return new AiAnswerResponse(openAiService.answer(request.getQuestion()));
+        return new AiAnswerResponse(openAiService.answer(request.getQuestion(), request.getLanguage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
