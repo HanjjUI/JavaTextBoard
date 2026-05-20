@@ -245,17 +245,19 @@ function generateAiAnswer() {
         })
     })
     .then(res => {
-        if (!res.ok) {
-            throw new Error();
-        }
-        return res.json();
+        return res.json().then(data => {
+            if (!res.ok) {
+                throw new Error(data.message || "Could not generate an AI answer.");
+            }
+            return data;
+        });
     })
     .then(data => {
         content.value = data.answer || "";
         content.focus();
     })
-    .catch(() => {
-        alert("Could not generate an AI answer. Check OPENAI_API_KEY on the server.");
+    .catch(error => {
+        alert(error.message);
     })
     .finally(() => {
         setAiLoading(false);

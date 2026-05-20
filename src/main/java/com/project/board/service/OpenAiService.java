@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class OpenAiService {
     ) {
         this.restClient = restClientBuilder.build();
         this.apiKey = apiKey;
-        this.model = model;
+        this.model = normalizeModel(model);
     }
 
     public String answer(String question) {
@@ -39,13 +40,18 @@ public class OpenAiService {
             throw new IllegalArgumentException("Question is required");
         }
 
-        JsonNode response = restClient.post()
-                .uri(RESPONSES_URL)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(createRequestBody(normalizedQuestion))
-                .retrieve()
-                .body(JsonNode.class);
+        JsonNode response;
+        try {
+            response = restClient.post()
+                    .uri(RESPONSES_URL)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey.trim())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(createRequestBody(normalizedQuestion))
+                    .retrieve()
+                    .body(JsonNode.class);
+        } catch (RestClientResponseException e) {
+            throw new IllegalStateException("OpenAI API error: " + extractErrorMessage(e));
+        }
 
         String answer = extractText(response);
         if (answer == null || answer.isBlank()) {
@@ -72,6 +78,27 @@ public class OpenAiService {
                 ),
                 "max_output_tokens", 700
         );
+    }
+
+    private String normalizeModel(String value) {
+        String normalizedModel = value == null ? "" : value.replaceAll("\\s+", "");
+        if (normalizedModel.isBlank()) {
+            return "gpt-5-nano";
+        }
+        return normalizedModel;
+    }
+
+    private String extractErrorMessage(RestClientResponseException e) {
+        try {
+            JsonNode error = e.getResponseBodyAs(JsonNode.class).path("error").path("message");
+            if (error.isTextual() && !error.asText().isBlank()) {
+                return error.asText();
+            }
+        } catch (RuntimeException ignored) {
+            // Fall back to the HTTP status when the response body is not JSON.
+        }
+
+        return e.getStatusCode() + " " + e.getStatusText();
     }
 
     private String extractText(JsonNode response) {
