@@ -592,15 +592,15 @@ async function viewDetail(id) {
         image.style.display = "none";
         pdf.src = data.imageUrl;
         pdf.style.display = "block";
-        attachment.href = data.imageUrl;
-        attachment.innerText = "PDFを新しいタブで開く";
+        attachment.href = getDownloadUrl(data.imageUrl);
+        attachment.innerText = "PDFをダウンロード";
         attachment.style.display = "inline-block";
     } else if (data.imageUrl) {
         image.removeAttribute("src");
         image.style.display = "none";
         pdf.removeAttribute("src");
         pdf.style.display = "none";
-        attachment.href = data.imageUrl;
+        attachment.href = getDownloadUrl(data.imageUrl);
         attachment.innerText = getAttachmentLabel(data.imageUrl);
         attachment.style.display = "inline-block";
     } else {
@@ -636,7 +636,7 @@ function isPdfUrl(value) {
 function getAttachmentLabel(value) {
     const path = getAttachmentPath(value);
     if (path.endsWith(".pdf")) {
-        return "PDFを開く";
+        return "PDFをダウンロード";
     }
     if (path.endsWith(".exe")) {
         return "EXEをダウンロード";
@@ -646,6 +646,14 @@ function getAttachmentLabel(value) {
 
 function getAttachmentPath(value) {
     return (value || "").toLowerCase().split("?")[0];
+}
+
+function getDownloadUrl(value) {
+    const filename = (value || "").split("/").pop();
+    if (!filename) {
+        return value;
+    }
+    return "/board/download/" + encodeURIComponent(filename);
 }
 
 document.getElementById("editBtn").addEventListener("click", function() {
