@@ -15,7 +15,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.UUID;
 import java.util.List;
 
 @RestController
@@ -24,6 +29,7 @@ public class BoardController {
 
     private static final int DEFAULT_PAGE_SIZE = 100;
     private static final String LOGIN_REQUIRED = "LOGIN_REQUIRED";
+    private static final Path UPLOAD_DIR = Path.of("uploads");
 
     private final BoardService service;
 
@@ -65,6 +71,25 @@ public class BoardController {
         return "OK";
     }
 
+    @PostMapping("/upload")
+    public String upload(@RequestParam MultipartFile file, HttpSession session) throws IOException {
+        if (getLoginUser(session) == null) {
+            return LOGIN_REQUIRED;
+        }
+
+        if (file.isEmpty() || !isPdf(file)) {
+            return "INVALID_FILE";
+        }
+
+        Files.createDirectories(UPLOAD_DIR);
+
+        String filename = UUID.randomUUID() + ".pdf";
+        Path target = UPLOAD_DIR.resolve(filename);
+        file.transferTo(target);
+
+        return "/uploads/" + filename;
+    }
+
     @PutMapping("/{id}")
     public String update(
             @PathVariable Long id,
@@ -95,5 +120,13 @@ public class BoardController {
 
     private String getLoginUser(HttpSession session) {
         return (String) session.getAttribute(SessionNames.LOGIN_USER);
+    }
+
+    private boolean isPdf(MultipartFile file) {
+        String contentType = file.getContentType();
+        String originalFilename = file.getOriginalFilename();
+
+        return "application/pdf".equalsIgnoreCase(contentType)
+                || (originalFilename != null && originalFilename.toLowerCase().endsWith(".pdf"));
     }
 }

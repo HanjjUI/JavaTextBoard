@@ -35,3 +35,6 @@ build/
 
 ### Eclipse workspace metadata ###
 .metadata/
+
+### Temporary uploads ###
+uploads/

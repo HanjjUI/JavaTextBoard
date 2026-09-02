@@ -153,8 +153,9 @@ button {
         </div>
         <input id="title">
 
-        <label for="imageUrl">Image URL</label>
-        <input id="imageUrl" placeholder="Optional">
+        <label for="pdfFile">PDF Attachment</label>
+        <input id="pdfFile" type="file" accept="application/pdf">
+        <input id="imageUrl" type="hidden">
 
         <label for="content">Content</label>
         <textarea id="content"></textarea>
@@ -186,9 +187,9 @@ if (editId) {
         });
 }
 
-function submitPost() {
+async function submitPost() {
     const title = document.getElementById("title").value.trim();
-    const imageUrl = document.getElementById("imageUrl").value.trim();
+    let imageUrl = document.getElementById("imageUrl").value.trim();
     const content = document.getElementById("content").value.trim();
 
     if (!title || !content) {
@@ -198,6 +199,13 @@ function submitPost() {
 
     const method = editId ? "PUT" : "POST";
     const url = editId ? `/board/${editId}` : "/board/write";
+
+    try {
+        imageUrl = await uploadPdfIfSelected(imageUrl);
+    } catch (error) {
+        alert(error.message);
+        return;
+    }
 
     fetch(url, {
         method: method,
@@ -210,7 +218,7 @@ function submitPost() {
             content: content
         })
     })
-    .then(res => res.text())
+        .then(res => res.text())
     .then(data => {
         if (data === "OK") {
             alert(editId ? "Post updated." : "Post created.");
@@ -229,6 +237,43 @@ function submitPost() {
     .catch(() => {
         alert("Could not reach the server.");
     });
+}
+
+async function uploadPdfIfSelected(currentUrl) {
+    const fileInput = document.getElementById("pdfFile");
+    const file = fileInput.files[0];
+
+    if (!file) {
+        return currentUrl;
+    }
+
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+        throw new Error("Only PDF files can be attached.");
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/board/upload", {
+        method: "POST",
+        body: formData
+    });
+    const result = await res.text();
+
+    if (result === "LOGIN_REQUIRED") {
+        location.href = "/login";
+        throw new Error("Login is required.");
+    }
+
+    if (result === "INVALID_FILE") {
+        throw new Error("Only PDF files can be attached.");
+    }
+
+    if (!res.ok) {
+        throw new Error("Could not upload the PDF.");
+    }
+
+    return result;
 }
 
 function setAiLoading(isLoading) {
