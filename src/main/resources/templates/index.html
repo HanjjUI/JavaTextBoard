@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Board</title>
+<title>掲示板</title>
 
 <style>
 body {
@@ -249,6 +249,15 @@ th {
     text-decoration: underline;
 }
 
+.detail-pdf {
+    display: none;
+    width: 100%;
+    height: 360px;
+    margin-bottom: 12px;
+    border: 1px solid #ececec;
+    border-radius: 8px;
+}
+
 .modal-actions {
     display: flex;
     gap: 8px;
@@ -310,20 +319,20 @@ th {
 
 <div class="container">
     <div class="header">
-        <button id="mainBtn">Home</button>
-        <div class="title">Board</div>
+        <button id="mainBtn">ホーム</button>
+        <div class="title">掲示板</div>
         <div id="authArea"></div>
     </div>
 
     <div class="toolbar">
         <div class="search-bar">
             <select id="searchType">
-                <option value="titleAuthor">Title + Author</option>
-                <option value="title">Title</option>
-                <option value="author">Author</option>
+                <option value="titleAuthor">タイトル + 投稿者</option>
+                <option value="title">タイトル</option>
+                <option value="author">投稿者</option>
             </select>
-            <input type="text" id="searchKeyword" placeholder="Search posts">
-            <button id="searchBtn">Search</button>
+            <input type="text" id="searchKeyword" placeholder="検索キーワードを入力">
+            <button id="searchBtn">検索</button>
         </div>
     </div>
 
@@ -333,10 +342,10 @@ th {
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Title</th>
-                        <th>Author</th>
-                        <th>Created</th>
-                        <th>Views</th>
+                        <th>タイトル</th>
+                        <th>投稿者</th>
+                        <th>投稿日時</th>
+                        <th>閲覧数</th>
                     </tr>
                 </thead>
                 <tbody id="boardBody"></tbody>
@@ -345,19 +354,19 @@ th {
     </div>
 
     <div class="footer">
-        <button id="writeBtn">New Post</button>
+        <button id="writeBtn">新規投稿</button>
     </div>
 </div>
 
 <div class="modal" id="loginModal">
     <div class="modal-box">
-        <h3>Login</h3>
-        <input id="li-username" placeholder="Username">
-        <input id="li-password" type="password" placeholder="Password">
+        <h3>ログイン</h3>
+        <input id="li-username" placeholder="ユーザー名">
+        <input id="li-password" type="password" placeholder="パスワード">
         <div class="modal-actions">
-            <button id="loginBtn">Login</button>
+            <button id="loginBtn">ログイン</button>
         </div>
-        <a href="/signup" class="modal-link">Create an account</a>
+        <a href="/signup" class="modal-link">新規登録はこちら</a>
     </div>
 </div>
 
@@ -365,17 +374,18 @@ th {
     <div class="modal-box">
         <h3 id="detailTitle"></h3>
         <img class="detail-image" id="detailImage" alt="">
-        <a class="detail-attachment" id="detailAttachment" target="_blank" rel="noopener">Open Attachment</a>
+        <iframe class="detail-pdf" id="detailPdf" title="PDFプレビュー"></iframe>
+        <a class="detail-attachment" id="detailAttachment" target="_blank" rel="noopener">添付ファイルを開く</a>
         <div class="detail-meta">
             <div><span class="detail-label">ID</span><span class="detail-value" id="detailId"></span></div>
-            <div><span class="detail-label">Author</span><span class="detail-value" id="detailAuthor"></span></div>
-            <div><span class="detail-label">Created</span><span class="detail-value" id="detailCreatedAt"></span></div>
-            <div><span class="detail-label">Views</span><span class="detail-value" id="detailViewCount"></span></div>
+            <div><span class="detail-label">投稿者</span><span class="detail-value" id="detailAuthor"></span></div>
+            <div><span class="detail-label">投稿日時</span><span class="detail-value" id="detailCreatedAt"></span></div>
+            <div><span class="detail-label">閲覧数</span><span class="detail-value" id="detailViewCount"></span></div>
         </div>
         <div class="detail-content" id="detailContent"></div>
         <div class="modal-actions">
-            <button id="editBtn">Edit</button>
-            <button id="deleteBtn">Delete</button>
+            <button id="editBtn">編集</button>
+            <button id="deleteBtn">削除</button>
         </div>
     </div>
 </div>
@@ -409,7 +419,7 @@ async function request(url, options) {
         }
         return res;
     } catch (e) {
-        alert("Could not reach the server.");
+        alert("サーバーに接続できませんでした。");
         throw e;
     }
 }
@@ -471,13 +481,13 @@ async function renderAuth() {
     if (currentUser !== "null") {
         area.innerHTML =
             "<span>" + escapeHTML(currentUser) + "</span>" +
-            "<button id='logoutBtn'>Logout</button>";
+            "<button id='logoutBtn'>ログアウト</button>";
 
         document.getElementById("logoutBtn").addEventListener("click", logout);
     } else {
         area.innerHTML =
-            "<button id='signupBtn'>Sign Up</button>" +
-            "<button id='openLoginBtn'>Login</button>";
+            "<button id='signupBtn'>新規登録</button>" +
+            "<button id='openLoginBtn'>ログイン</button>";
 
         document.getElementById("signupBtn").addEventListener("click", function() {
             location.href = "/signup";
@@ -494,7 +504,7 @@ async function renderBoard() {
     const body = document.getElementById("boardBody");
 
     if (data.length === 0) {
-        body.innerHTML = "<tr class='empty-row'><td colspan='5'>No posts yet.</td></tr>";
+        body.innerHTML = "<tr class='empty-row'><td colspan='5'>投稿がありません。</td></tr>";
         return;
     }
 
@@ -544,7 +554,7 @@ document.getElementById("loginBtn").addEventListener("click", async function() {
         await renderAuth();
         await renderBoard();
     } else {
-        alert("Check your username or password.");
+        alert("ユーザー名またはパスワードを確認してください。");
     }
 });
 
@@ -560,6 +570,7 @@ async function viewDetail(id) {
 
     const data = await API.detail(id, true);
     const image = document.getElementById("detailImage");
+    const pdf = document.getElementById("detailPdf");
     const attachment = document.getElementById("detailAttachment");
 
     document.getElementById("detailTitle").innerText = data.title;
@@ -572,17 +583,31 @@ async function viewDetail(id) {
     if (isImageUrl(data.imageUrl)) {
         image.src = data.imageUrl;
         image.style.display = "block";
+        pdf.removeAttribute("src");
+        pdf.style.display = "none";
         attachment.removeAttribute("href");
         attachment.style.display = "none";
+    } else if (isPdfUrl(data.imageUrl)) {
+        image.removeAttribute("src");
+        image.style.display = "none";
+        pdf.src = data.imageUrl;
+        pdf.style.display = "block";
+        attachment.href = data.imageUrl;
+        attachment.innerText = "PDFを新しいタブで開く";
+        attachment.style.display = "inline-block";
     } else if (data.imageUrl) {
         image.removeAttribute("src");
         image.style.display = "none";
+        pdf.removeAttribute("src");
+        pdf.style.display = "none";
         attachment.href = data.imageUrl;
         attachment.innerText = getAttachmentLabel(data.imageUrl);
         attachment.style.display = "inline-block";
     } else {
         image.removeAttribute("src");
         image.style.display = "none";
+        pdf.removeAttribute("src");
+        pdf.style.display = "none";
         attachment.removeAttribute("href");
         attachment.style.display = "none";
     }
@@ -604,15 +629,19 @@ function isImageUrl(value) {
             || path.endsWith(".webp");
 }
 
+function isPdfUrl(value) {
+    return getAttachmentPath(value).endsWith(".pdf");
+}
+
 function getAttachmentLabel(value) {
     const path = getAttachmentPath(value);
     if (path.endsWith(".pdf")) {
-        return "Open PDF";
+        return "PDFを開く";
     }
     if (path.endsWith(".exe")) {
-        return "Download EXE";
+        return "EXEをダウンロード";
     }
-    return "Open Attachment";
+    return "添付ファイルを開く";
 }
 
 function getAttachmentPath(value) {
@@ -624,7 +653,7 @@ document.getElementById("editBtn").addEventListener("click", function() {
 });
 
 document.getElementById("deleteBtn").addEventListener("click", async function() {
-    if (!confirm("Delete this post?")) {
+    if (!confirm("この投稿を削除しますか？")) {
         return;
     }
 
@@ -637,12 +666,12 @@ document.getElementById("deleteBtn").addEventListener("click", async function() 
     }
 
     if (result === "LOGIN_REQUIRED") {
-        alert("Login is required.");
+        alert("ログインが必要です。");
         location.href = "/login";
         return;
     }
 
-    alert("Could not delete the post.");
+    alert("投稿を削除できませんでした。");
 });
 
 document.getElementById("writeBtn").addEventListener("click", function() {

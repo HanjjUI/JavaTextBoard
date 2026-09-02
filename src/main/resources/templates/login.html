@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>ログイン</title>
 
     <style>
         body {
@@ -53,17 +53,17 @@
 <body>
 
 <div class="login-box">
-    <h2>Login</h2>
+    <h2>ログイン</h2>
 
-    <input id="u" placeholder="Username">
-    <input id="p" type="password" placeholder="Password">
+    <input id="u" placeholder="ユーザー名">
+    <input id="p" type="password" placeholder="パスワード">
 
-    <button onclick="login()">Login</button>
-    <button onclick="goMain()">Home</button>
+    <button onclick="login()">ログイン</button>
+    <button onclick="goMain()">ホーム</button>
 
     <p id="msg"></p>
 
-    <a href="/signup">Create an account</a>
+    <a href="/signup">新規登録はこちら</a>
 </div>
 
 <script>
@@ -75,7 +75,7 @@ function login() {
     msg.innerText = "";
 
     if (!u || !p) {
-        msg.innerText = "Username and password are required.";
+        msg.innerText = "ユーザー名とパスワードを入力してください。";
         return;
     }
 
@@ -94,14 +94,14 @@ function login() {
     })
     .then(function(data) {
         if (data === "OK") {
-            alert("Logged in.");
+            alert("ログインしました。");
             location.href = "/";
         } else {
-            msg.innerText = "Check your username or password.";
+            msg.innerText = "ユーザー名またはパスワードを確認してください。";
         }
     })
     .catch(function() {
-        msg.innerText = "Could not reach the server.";
+        msg.innerText = "サーバーに接続できませんでした。";
     });
 }
 

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Post List</title>
+    <title>投稿一覧</title>
 
     <style>
         body {
@@ -41,18 +41,18 @@
 
 <body>
 
-<h2>Post List</h2>
+<h2>投稿一覧</h2>
 
-<button onclick="location.href='/board/write'">New Post</button>
+<button onclick="location.href='/board/write'">新規投稿</button>
 
 <table>
     <thead>
         <tr>
             <th>ID</th>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Created</th>
-            <th>Views</th>
+            <th>タイトル</th>
+            <th>投稿者</th>
+            <th>投稿日時</th>
+            <th>閲覧数</th>
         </tr>
     </thead>
 
@@ -66,7 +66,7 @@ fetch("/board/list")
         const list = document.getElementById("list");
 
         if (data.length === 0) {
-            list.innerHTML = "<tr><td colspan='5'>No posts yet.</td></tr>";
+            list.innerHTML = "<tr><td colspan='5'>投稿がありません。</td></tr>";
             return;
         }
 
@@ -83,7 +83,7 @@ fetch("/board/list")
     })
     .catch(() => {
         document.getElementById("list").innerHTML =
-            "<tr><td colspan='5'>Could not load posts.</td></tr>";
+            "<tr><td colspan='5'>投稿を読み込めませんでした。</td></tr>";
     });
 </script>
 

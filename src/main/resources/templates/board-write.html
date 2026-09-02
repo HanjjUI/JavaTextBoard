@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Post Editor</title>
+<title>投稿作成</title>
 
 <style>
 body {
@@ -152,28 +152,28 @@ button {
 
 <div class="container">
     <div class="header">
-        <button onclick="location.href='/'">Home</button>
-        <div class="title" id="pageTitle">New Post</div>
+        <button onclick="location.href='/'">ホーム</button>
+        <div class="title" id="pageTitle">新規投稿</div>
         <div></div>
     </div>
 
     <div class="content">
         <div class="field-header">
-            <label for="title">Title / Question</label>
+            <label for="title">タイトル / 質問</label>
             <div class="ai-tools">
                 <span class="ai-status" id="aiStatus"></span>
-                <select id="aiLanguage" aria-label="AI answer language">
+                <select id="aiLanguage" aria-label="AI回答言語">
                     <option value="ja" selected>日本語</option>
-                    <option value="auto">Auto</option>
-                    <option value="ko">한국어</option>
-                    <option value="en">English</option>
+                    <option value="auto">自動</option>
+                    <option value="ko">韓国語</option>
+                    <option value="en">英語</option>
                 </select>
-                <button id="aiBtn" type="button" onclick="generateAiAnswer()">AI Answer</button>
+                <button id="aiBtn" type="button" onclick="generateAiAnswer()">AIで本文作成</button>
             </div>
         </div>
         <input id="title">
 
-        <label for="attachmentFile">Attachment</label>
+        <label for="attachmentFile">添付ファイル</label>
         <input id="attachmentFile" type="file" accept="application/pdf,image/*,.exe">
         <div class="attachment-preview" id="attachmentPreview">
             <img id="attachmentPreviewImage" alt="">
@@ -181,12 +181,12 @@ button {
         </div>
         <input id="imageUrl" type="hidden">
 
-        <label for="content">Content</label>
+        <label for="content">本文</label>
         <textarea id="content"></textarea>
     </div>
 
     <div class="footer">
-        <button id="submitBtn" onclick="submitPost()">Save</button>
+        <button id="submitBtn" onclick="submitPost()">保存</button>
     </div>
 </div>
 
@@ -195,8 +195,8 @@ const params = new URLSearchParams(location.search);
 const editId = params.get("id");
 
 if (editId) {
-    document.getElementById("pageTitle").innerText = "Edit Post";
-    document.getElementById("submitBtn").innerText = "Update";
+    document.getElementById("pageTitle").innerText = "投稿編集";
+    document.getElementById("submitBtn").innerText = "更新";
 
     fetch(`/board/${editId}?increaseViewCount=false`)
         .then(res => res.json())
@@ -206,7 +206,7 @@ if (editId) {
             document.getElementById("content").value = data.content || "";
         })
         .catch(() => {
-            alert("Could not load the post.");
+            alert("投稿を読み込めませんでした。");
             location.href = "/";
         });
 }
@@ -217,7 +217,7 @@ async function submitPost() {
     const content = document.getElementById("content").value.trim();
 
     if (!title || !content) {
-        alert("Title and content are required.");
+        alert("タイトルと本文を入力してください。");
         return;
     }
 
@@ -245,21 +245,21 @@ async function submitPost() {
         .then(res => res.text())
     .then(data => {
         if (data === "OK") {
-            alert(editId ? "Post updated." : "Post created.");
+            alert(editId ? "投稿を更新しました。" : "投稿を作成しました。");
             location.href = "/";
             return;
         }
 
         if (data === "LOGIN_REQUIRED") {
-            alert("Login is required.");
+            alert("ログインが必要です。");
             location.href = "/login";
             return;
         }
 
-        alert(editId ? "Could not update the post." : "Could not create the post.");
+        alert(editId ? "投稿を更新できませんでした。" : "投稿を作成できませんでした。");
     })
     .catch(() => {
-        alert("Could not reach the server.");
+        alert("サーバーに接続できませんでした。");
     });
 }
 
@@ -272,7 +272,7 @@ async function uploadAttachmentIfSelected(currentUrl) {
     }
 
     if (!isAllowedAttachment(file)) {
-        throw new Error("Only PDF, image, or EXE files can be attached.");
+        throw new Error("PDF、画像、EXEファイルのみ添付できます。");
     }
 
     const formData = new FormData();
@@ -286,15 +286,15 @@ async function uploadAttachmentIfSelected(currentUrl) {
 
     if (result === "LOGIN_REQUIRED") {
         location.href = "/login";
-        throw new Error("Login is required.");
+        throw new Error("ログインが必要です。");
     }
 
     if (result === "INVALID_FILE") {
-        throw new Error("Only PDF, image, or EXE files can be attached.");
+        throw new Error("PDF、画像、EXEファイルのみ添付できます。");
     }
 
     if (!res.ok) {
-        throw new Error("Could not upload the attachment.");
+        throw new Error("添付ファイルをアップロードできませんでした。");
     }
 
     return result;
@@ -351,7 +351,7 @@ document.getElementById("attachmentFile").addEventListener("change", updateAttac
 function setAiLoading(isLoading) {
     document.getElementById("aiBtn").disabled = isLoading;
     document.getElementById("aiLanguage").disabled = isLoading;
-    document.getElementById("aiStatus").innerText = isLoading ? "Writing..." : "";
+    document.getElementById("aiStatus").innerText = isLoading ? "作成中..." : "";
 }
 
 function generateAiAnswer() {
@@ -360,7 +360,7 @@ function generateAiAnswer() {
     const content = document.getElementById("content");
 
     if (!question) {
-        alert("Enter a title or question first.");
+        alert("先にタイトルまたは質問を入力してください。");
         return;
     }
 
@@ -379,7 +379,7 @@ function generateAiAnswer() {
     .then(res => {
         return res.json().then(data => {
             if (!res.ok) {
-                throw new Error(data.message || "Could not generate an AI answer.");
+                throw new Error(data.message || "AI本文を作成できませんでした。");
             }
             return data;
         });

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Sign Up</title>
+    <title>新規登録</title>
 
     <style>
         body {
@@ -53,19 +53,19 @@
 <body>
 
 <div class="signup-box">
-    <h2>Sign Up</h2>
+    <h2>新規登録</h2>
 
-    <input id="u" placeholder="Username">
-    <input id="p" type="password" placeholder="Password">
+    <input id="u" placeholder="ユーザー名">
+    <input id="p" type="password" placeholder="パスワード">
 
     <div>
-        <button onclick="signup()">Sign Up</button>
-        <button onclick="goMain()">Home</button>
+        <button onclick="signup()">登録</button>
+        <button onclick="goMain()">ホーム</button>
     </div>
 
     <p id="msg"></p>
 
-    <a href="/login">Go to login</a>
+    <a href="/login">ログインはこちら</a>
 </div>
 
 <script>
@@ -77,7 +77,7 @@ function signup() {
     msg.innerText = "";
 
     if (!u || !p) {
-        msg.innerText = "Username and password are required.";
+        msg.innerText = "ユーザー名とパスワードを入力してください。";
         return;
     }
 
@@ -91,16 +91,16 @@ function signup() {
     .then(res => res.text())
     .then(data => {
         if (data === "OK") {
-            alert("Account created.");
+            alert("登録しました。");
             location.href = "/login";
         } else if (data === "DUPLICATE") {
-            msg.innerText = "That username is already taken.";
+            msg.innerText = "このユーザー名はすでに使用されています。";
         } else {
-            msg.innerText = "Could not create the account.";
+            msg.innerText = "登録できませんでした。";
         }
     })
     .catch(() => {
-        msg.innerText = "Could not reach the server.";
+        msg.innerText = "サーバーに接続できませんでした。";
     });
 }
 
