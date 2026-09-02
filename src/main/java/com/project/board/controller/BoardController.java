@@ -20,8 +20,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/board")
@@ -30,6 +32,7 @@ public class BoardController {
     private static final int DEFAULT_PAGE_SIZE = 100;
     private static final String LOGIN_REQUIRED = "LOGIN_REQUIRED";
     private static final Path UPLOAD_DIR = Path.of("uploads");
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("pdf", "jpg", "jpeg", "png", "gif", "webp", "exe");
 
     private final BoardService service;
 
@@ -77,13 +80,14 @@ public class BoardController {
             return LOGIN_REQUIRED;
         }
 
-        if (file.isEmpty() || !isPdf(file)) {
+        String extension = getAllowedExtension(file);
+        if (file.isEmpty() || extension == null) {
             return "INVALID_FILE";
         }
 
         Files.createDirectories(UPLOAD_DIR);
 
-        String filename = UUID.randomUUID() + ".pdf";
+        String filename = UUID.randomUUID() + "." + extension;
         Path target = UPLOAD_DIR.resolve(filename);
         file.transferTo(target);
 
@@ -122,11 +126,19 @@ public class BoardController {
         return (String) session.getAttribute(SessionNames.LOGIN_USER);
     }
 
-    private boolean isPdf(MultipartFile file) {
-        String contentType = file.getContentType();
+    private String getAllowedExtension(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.contains(".")) {
+            return null;
+        }
 
-        return "application/pdf".equalsIgnoreCase(contentType)
-                || (originalFilename != null && originalFilename.toLowerCase().endsWith(".pdf"));
+        String extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1)
+                .toLowerCase(Locale.ROOT);
+
+        if (!ALLOWED_EXTENSIONS.contains(extension)) {
+            return null;
+        }
+
+        return extension;
     }
 }

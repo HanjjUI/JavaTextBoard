@@ -365,7 +365,7 @@ th {
     <div class="modal-box">
         <h3 id="detailTitle"></h3>
         <img class="detail-image" id="detailImage" alt="">
-        <a class="detail-attachment" id="detailAttachment" target="_blank" rel="noopener">Open PDF</a>
+        <a class="detail-attachment" id="detailAttachment" target="_blank" rel="noopener">Open Attachment</a>
         <div class="detail-meta">
             <div><span class="detail-label">ID</span><span class="detail-value" id="detailId"></span></div>
             <div><span class="detail-label">Author</span><span class="detail-value" id="detailAuthor"></span></div>
@@ -569,16 +569,17 @@ async function viewDetail(id) {
     document.getElementById("detailCreatedAt").innerText = formatDateTime(data.createdAt);
     document.getElementById("detailViewCount").innerText = data.viewCount;
 
-    if (isPdfUrl(data.imageUrl)) {
-        image.removeAttribute("src");
-        image.style.display = "none";
-        attachment.href = data.imageUrl;
-        attachment.style.display = "inline-block";
-    } else if (data.imageUrl) {
+    if (isImageUrl(data.imageUrl)) {
         image.src = data.imageUrl;
         image.style.display = "block";
         attachment.removeAttribute("href");
         attachment.style.display = "none";
+    } else if (data.imageUrl) {
+        image.removeAttribute("src");
+        image.style.display = "none";
+        attachment.href = data.imageUrl;
+        attachment.innerText = getAttachmentLabel(data.imageUrl);
+        attachment.style.display = "inline-block";
     } else {
         image.removeAttribute("src");
         image.style.display = "none";
@@ -594,8 +595,28 @@ async function viewDetail(id) {
     await renderBoard();
 }
 
-function isPdfUrl(value) {
-    return value && value.toLowerCase().split("?")[0].endsWith(".pdf");
+function isImageUrl(value) {
+    const path = getAttachmentPath(value);
+    return path.endsWith(".jpg")
+            || path.endsWith(".jpeg")
+            || path.endsWith(".png")
+            || path.endsWith(".gif")
+            || path.endsWith(".webp");
+}
+
+function getAttachmentLabel(value) {
+    const path = getAttachmentPath(value);
+    if (path.endsWith(".pdf")) {
+        return "Open PDF";
+    }
+    if (path.endsWith(".exe")) {
+        return "Download EXE";
+    }
+    return "Open Attachment";
+}
+
+function getAttachmentPath(value) {
+    return (value || "").toLowerCase().split("?")[0];
 }
 
 document.getElementById("editBtn").addEventListener("click", function() {
